@@ -1,0 +1,5 @@
+{
+  "name": "QA Control Center",
+  "description": "A centralized dashboard for QA engineers to quickly access environment links, reports, and documentation. It features categorized links, a quick search filter, and a dark/light theme toggle for a personalized experience.",
+  "requestFramePermissions": []
+}

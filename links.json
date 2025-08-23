@@ -1,0 +1,73 @@
+
+[
+  {
+    "category": "Sites",
+    "name": "Beta 1",
+    "url": "https://beta1.myapp.com"
+  },
+  {
+    "category": "Sites",
+    "name": "Beta 2",
+    "url": "https://beta2.myapp.com"
+  },
+  {
+    "category": "Sites",
+    "name": "Pre-Production",
+    "url": "https://preprod.myapp.com"
+  },
+  {
+    "category": "Sites",
+    "name": "Production",
+    "url": "https://prod.myapp.com"
+  },
+  {
+    "category": "Indexer Reports",
+    "name": "Beta 1 Indexer Report",
+    "url": "https://reports.beta1.com"
+  },
+  {
+    "category": "Indexer Reports",
+    "name": "Beta 2 Indexer Report",
+    "url": "https://reports.beta2.com"
+  },
+  {
+    "category": "Indexer Reports",
+    "name": "Pre-Prod Indexer Report",
+    "url": "https://reports.preprod.com"
+  },
+  {
+    "category": "Confluence",
+    "name": "Release Notes",
+    "url": "https://confluence.mycompany.com/release-notes"
+  },
+  {
+    "category": "Confluence",
+    "name": "Test Plan",
+    "url": "https://confluence.mycompany.com/test-plan"
+  },
+  {
+    "category": "Confluence",
+    "name": "QA Team Space",
+    "url": "https://confluence.mycompany.com/qa-space"
+  },
+  {
+    "category": "Tools",
+    "name": "Jira Board",
+    "url": "https://jira.mycompany.com/qa-board"
+  },
+  {
+    "category": "Tools",
+    "name": "Jenkins CI/CD",
+    "url": "https://jenkins.mycompany.com"
+  },
+  {
+    "category": "Tools",
+    "name": "Sentry Error Monitoring",
+    "url": "https://sentry.mycompany.com"
+  },
+  {
+    "category": "Tools",
+    "name": "Grafana Dashboards",
+    "url": "https://grafana.mycompany.com"
+  }
+]
