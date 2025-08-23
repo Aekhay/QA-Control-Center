@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo } from 'react';
-import { LinkItem, CategorizedLinks } from './types';
+import { LinkItem, CategorizedLinks, TableData } from './types';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import LinkCard from './components/LinkCard';
@@ -7,6 +7,8 @@ import EditLinkModal from './components/EditLinkModal';
 import AddLinkModal from './components/AddLinkModal';
 import ConfirmBulkDeleteModal from './components/ConfirmBulkDeleteModal';
 import CommandPalette from './components/CommandPalette';
+import TestDataView from './components/TestDataView';
+import Toast from './components/Toast';
 
 const App: React.FC = () => {
   type ViewMode = 'grid' | 'list';
@@ -28,17 +30,25 @@ const App: React.FC = () => {
   // State for command palette
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
 
+  // State for Test Data and Toasts
+  const [testData, setTestData] = useState<TableData | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'found' | 'not_found' } | null>(null);
+
+  const isLinksView = selectedCategory !== 'Test Data';
+
   // Global keydown listener for command palette
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
             e.preventDefault();
-            setIsCommandPaletteOpen(true);
+            if (isLinksView) {
+                setIsCommandPaletteOpen(true);
+            }
         }
     };
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, []);
+  }, [isLinksView]);
 
 
   // Data loading and persistence
@@ -64,8 +74,38 @@ const App: React.FC = () => {
         setLoading(false);
       }
     };
+
+    const loadTestData = () => {
+        try {
+            const savedData = localStorage.getItem('skuTestData');
+            if (savedData) {
+                setTestData(JSON.parse(savedData));
+            }
+        } catch (error) {
+            console.error("Failed to load test data from localStorage", error);
+        }
+    };
+    
     fetchLinks();
+    loadTestData();
   }, []);
+  
+  // SKU Search Effect
+  useEffect(() => {
+    const SKU_REGEX = /^\d{8,}$/; // Simple regex for SKU-like numbers (8+ digits)
+
+    if (SKU_REGEX.test(searchTerm.trim()) && testData) {
+        const query = searchTerm.trim();
+        const found = testData.rows.some(row => row.some(cell => cell === query));
+
+        setToast({
+            message: found
+                ? `SKU ${query} is in Automation Testdata list.`
+                : `SKU ${query} is available for Testing Purpose.`,
+            type: found ? 'found' : 'not_found'
+        });
+    }
+  }, [searchTerm, testData]);
 
   const handleUpdateLink = (updatedLink: LinkItem) => {
     const updatedLinks = allLinks.map(link => link.id === updatedLink.id ? updatedLink : link);
@@ -87,15 +127,23 @@ const App: React.FC = () => {
     setAllLinks(updatedLinks);
     localStorage.setItem('qaCenterLinks', JSON.stringify(updatedLinks));
     
-    // Reset and exit delete mode
     setIsConfirmBulkDeleteOpen(false);
     setSelectedLinkIds([]);
     setIsDeleteModeActive(false);
   };
+  
+  const handleTestDataChange = (data: TableData | null) => {
+    setTestData(data);
+    if (data) {
+        localStorage.setItem('skuTestData', JSON.stringify(data));
+    } else {
+        localStorage.removeItem('skuTestData');
+    }
+  };
 
   const toggleDeleteMode = () => {
     setIsDeleteModeActive(!isDeleteModeActive);
-    setSelectedLinkIds([]); // Clear selections when toggling mode
+    setSelectedLinkIds([]); 
   };
   
   const handleSelectLink = (linkId: string) => {
@@ -122,7 +170,21 @@ const App: React.FC = () => {
     }, {});
   }, [allLinks]);
 
+  const sidebarCategories = useMemo(() => {
+    return ['Test Data', ...Object.keys(categorizedLinks)];
+  }, [categorizedLinks]);
+
   const filteredLinks = useMemo(() => {
+    if (!isLinksView) return {};
+    
+    const lowercasedFilter = searchTerm.toLowerCase();
+    
+    // If the search term is an SKU, don't filter the links list
+    const SKU_REGEX = /^\d{8,}$/;
+    if (SKU_REGEX.test(searchTerm.trim())) {
+        return categorizedLinks;
+    }
+
     let linksToFilter = { ...categorizedLinks };
 
     if (selectedCategory !== 'All') {
@@ -132,8 +194,7 @@ const App: React.FC = () => {
     if (!searchTerm.trim()) {
       return linksToFilter;
     }
-
-    const lowercasedFilter = searchTerm.toLowerCase();
+    
     const filtered: CategorizedLinks = {};
 
     for (const category in linksToFilter) {
@@ -147,7 +208,7 @@ const App: React.FC = () => {
       }
     }
     return filtered;
-  }, [searchTerm, categorizedLinks, selectedCategory]);
+  }, [searchTerm, categorizedLinks, selectedCategory, isLinksView]);
 
   const hasResults = Object.values(filteredLinks).some(links => links.length > 0);
 
@@ -160,58 +221,67 @@ const App: React.FC = () => {
   return (
     <div className="flex min-h-screen text-slate-800 bg-slate-100">
       <Sidebar
-        categories={Object.keys(categorizedLinks)}
+        categories={sidebarCategories}
         selectedCategory={selectedCategory}
         setSelectedCategory={setSelectedCategory}
         searchTerm={searchTerm}
         setSearchTerm={setSearchTerm}
       />
       <div className="flex-1 flex flex-col h-screen">
-        <Header
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            onAddClick={() => setIsAddModalOpen(true)}
-            isDeleteModeActive={isDeleteModeActive}
-            toggleDeleteMode={toggleDeleteMode}
-        />
-        <main className={`flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto ${showDeleteBar ? 'pb-24' : ''}`}>
-          {loading ? (
-            <div className="text-center py-16">
-              <h2 className="text-2xl font-semibold text-slate-600">Loading links...</h2>
-            </div>
-          ) : hasResults ? (
-             Object.entries(filteredLinks).map(([category, links]) => (
-                <section key={category} className="mb-8">
-                    {selectedCategory === 'All' && (
-                         <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b-2 border-sky-500/30">
-                            {category}
-                         </h2>
-                    )}
-                    <div className={viewWrapperClasses}>
-                        {links.map((link) => (
-                           <LinkCard 
-                            key={link.id} 
-                            link={link} 
-                            viewMode={viewMode} 
-                            onEdit={() => setEditingLink(link)}
-                            isDeleteModeActive={isDeleteModeActive}
-                            isSelected={selectedLinkIds.includes(link.id)}
-                            onSelect={handleSelectLink}
-                          />
-                        ))}
-                    </div>
-                </section>
-             ))
+        {isLinksView && (
+            <Header
+                viewMode={viewMode}
+                setViewMode={setViewMode}
+                onAddClick={() => setIsAddModalOpen(true)}
+                isDeleteModeActive={isDeleteModeActive}
+                toggleDeleteMode={toggleDeleteMode}
+            />
+        )}
+        <main className={`flex-1 container mx-auto px-4 sm:px-6 lg:px-8 py-8 overflow-y-auto ${(isLinksView && showDeleteBar) ? 'pb-24' : ''}`}>
+          {isLinksView ? (
+            loading ? (
+              <div className="text-center py-16">
+                <h2 className="text-2xl font-semibold text-slate-600">Loading links...</h2>
+              </div>
+            ) : hasResults ? (
+               Object.entries(filteredLinks).map(([category, links]) => (
+                  <section key={category} className="mb-8">
+                      {selectedCategory === 'All' && (
+                           <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b-2 border-sky-500/30">
+                              {category}
+                           </h2>
+                      )}
+                      <div className={viewWrapperClasses}>
+                          {links.map((link) => (
+                             <LinkCard 
+                              key={link.id} 
+                              link={link} 
+                              viewMode={viewMode} 
+                              onEdit={() => setEditingLink(link)}
+                              isDeleteModeActive={isDeleteModeActive}
+                              isSelected={selectedLinkIds.includes(link.id)}
+                              onSelect={handleSelectLink}
+                            />
+                          ))}
+                      </div>
+                  </section>
+               ))
+            ) : (
+              <div className="text-center py-16">
+                <h2 className="text-2xl font-semibold text-slate-600">No results found</h2>
+                <p className="mt-2 text-slate-500">Try adjusting your search or filter.</p>
+              </div>
+            )
           ) : (
-            <div className="text-center py-16">
-              <h2 className="text-2xl font-semibold text-slate-600">No results found</h2>
-              <p className="mt-2 text-slate-500">Try adjusting your search or filter.</p>
-            </div>
+            <TestDataView 
+                tableData={testData}
+                onDataChange={handleTestDataChange}
+            />
           )}
         </main>
       </div>
       
-      {showDeleteBar && (
+      {isLinksView && showDeleteBar && (
         <div className="fixed bottom-0 left-64 right-0 bg-white/80 backdrop-blur-sm z-20 border-t border-slate-200">
             <div className="container mx-auto px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
                 <span className="font-medium text-slate-700">
@@ -235,28 +305,28 @@ const App: React.FC = () => {
         </div>
       )}
 
-      {isAddModalOpen && (
+      {isLinksView && isAddModalOpen && (
         <AddLinkModal
             categories={Object.keys(categorizedLinks)}
             onClose={() => setIsAddModalOpen(false)}
             onSave={handleSaveNewLink}
         />
       )}
-      {editingLink && (
+      {isLinksView && editingLink && (
         <EditLinkModal
             link={editingLink}
             onClose={() => setEditingLink(null)}
             onSave={handleUpdateLink}
         />
       )}
-      {isConfirmBulkDeleteOpen && (
+      {isLinksView && isConfirmBulkDeleteOpen && (
         <ConfirmBulkDeleteModal
             linksToDelete={allLinks.filter(link => selectedLinkIds.includes(link.id))}
             onClose={() => setIsConfirmBulkDeleteOpen(false)}
             onConfirm={handleConfirmBulkDelete}
         />
       )}
-      {isCommandPaletteOpen && (
+      {isLinksView && isCommandPaletteOpen && (
         <CommandPalette 
             isOpen={isCommandPaletteOpen}
             onClose={() => setIsCommandPaletteOpen(false)}
@@ -273,6 +343,13 @@ const App: React.FC = () => {
                 setIsCommandPaletteOpen(false);
                 setViewMode(mode);
             }}
+        />
+      )}
+       {toast && (
+        <Toast
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
         />
       )}
     </div>

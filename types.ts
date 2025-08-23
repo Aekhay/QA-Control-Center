@@ -8,3 +8,8 @@ export interface LinkItem {
 export interface CategorizedLinks {
   [key: string]: LinkItem[];
 }
+
+export interface TableData {
+  headers: string[];
+  rows: string[][];
+}

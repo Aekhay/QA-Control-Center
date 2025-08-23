@@ -12,7 +12,7 @@ interface SidebarProps {
 const Sidebar: React.FC<SidebarProps> = ({ categories, selectedCategory, setSelectedCategory, searchTerm, setSearchTerm }) => {
   const [isNavOpen, setIsNavOpen] = useState(true);
   const [shortcutHint, setShortcutHint] = useState('⌘K');
-  const allCategories = ['All', ...categories];
+  const allNavItems = ['All', ...categories];
 
   useEffect(() => {
     // Set hint based on OS
@@ -38,7 +38,7 @@ const Sidebar: React.FC<SidebarProps> = ({ categories, selectedCategory, setSele
         className="flex justify-between items-center p-2 rounded-md hover:bg-slate-100 cursor-pointer mb-2"
         onClick={() => setIsNavOpen(!isNavOpen)}
       >
-        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">Categories</h2>
+        <h2 className="text-sm font-bold uppercase tracking-wider text-slate-500">Menu</h2>
         <ChevronDownIcon
             className={`w-5 h-5 text-slate-500 transition-transform duration-300 ${
               isNavOpen ? 'rotate-180' : ''
@@ -49,7 +49,7 @@ const Sidebar: React.FC<SidebarProps> = ({ categories, selectedCategory, setSele
       {isNavOpen && (
         <nav className="flex-1 overflow-y-auto">
           <ul>
-            {allCategories.map((category) => (
+            {allNavItems.map((category) => (
               <li key={category} className="mb-1">
                 <button
                   onClick={() => setSelectedCategory(category)}
@@ -69,7 +69,7 @@ const Sidebar: React.FC<SidebarProps> = ({ categories, selectedCategory, setSele
 
       <footer className="mt-4 pt-4 border-t border-slate-200 text-xs text-slate-500">
         <p>
-            To restore default links, clear the application's local storage.
+            To restore default data, clear the application's local storage.
         </p>
       </footer>
     </aside>
