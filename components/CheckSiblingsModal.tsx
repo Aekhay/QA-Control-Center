@@ -1,14 +1,16 @@
 import React, { useState, useEffect } from 'react';
 import { CloseIcon, CopyIcon } from '../constants';
-import { SiblingApiResponse } from '../types';
+import { SiblingApiResponse, ApiEnvironment } from '../types';
 
 interface CheckSiblingsModalProps {
     onClose: () => void;
+    apiEnvironments: ApiEnvironment[];
+    skuToSearch: string;
+    selectedEnvId: string;
 }
 
-const CheckSiblingsModal: React.FC<CheckSiblingsModalProps> = ({ onClose }) => {
-    const [sku, setSku] = useState('');
-    const [isLoading, setIsLoading] = useState(false);
+const CheckSiblingsModal: React.FC<CheckSiblingsModalProps> = ({ onClose, apiEnvironments, skuToSearch, selectedEnvId }) => {
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [result, setResult] = useState<string[] | null>(null);
     const [copySuccess, setCopySuccess] = useState(false);
@@ -21,43 +23,51 @@ const CheckSiblingsModal: React.FC<CheckSiblingsModalProps> = ({ onClose }) => {
         return () => window.removeEventListener('keydown', handleEsc);
     }, [onClose]);
 
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault();
-        if (!sku.trim()) return;
+    useEffect(() => {
+        const fetchSiblings = async () => {
+            setIsLoading(true);
+            setError(null);
+            setResult(null);
 
-        setIsLoading(true);
-        setError(null);
-        setResult(null);
-        setCopySuccess(false);
+            const selectedEnv = apiEnvironments.find(env => env.id === selectedEnvId);
+            if (!selectedEnv) {
+                setError("Selected environment not found.");
+                setIsLoading(false);
+                return;
+            }
 
-        try {
-            const targetUrl = `https://www.ounass.ae/product/findbysku?sku=${sku.trim()}&_fields=siblings`;
-            // Switched to a more stable CORS proxy to avoid 403 errors
-            const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;
-            
-            const response = await fetch(proxyUrl);
-            
-            if (!response.ok) {
-                 if (response.status === 404) {
-                    throw new Error(`API Error: SKU ${sku.trim()} not found.`);
+            try {
+                const baseUrl = selectedEnv.url.endsWith('/') ? selectedEnv.url.slice(0, -1) : selectedEnv.url;
+                const targetUrl = `${baseUrl}/product/findbysku?sku=${skuToSearch.trim()}&_fields=siblings`;
+                const proxyUrl = `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(targetUrl)}`;
+                
+                const response = await fetch(proxyUrl);
+                
+                if (!response.ok) {
+                    if (response.status === 404) {
+                        throw new Error(`API Error: SKU ${skuToSearch.trim()} not found on ${selectedEnv.name}.`);
+                    }
+                    throw new Error(`Network response was not ok. Status: ${response.status}`);
                 }
-                throw new Error(`Network response was not ok. Status: ${response.status}`);
-            }
 
-            const data: SiblingApiResponse = await response.json();
+                const data: SiblingApiResponse = await response.json();
 
-            if (data.siblings && data.siblings.length > 0) {
-                setResult(data.siblings);
-            } else {
-                setError(`No siblings found for SKU ${sku.trim()}.`);
+                if (data.siblings && data.siblings.length > 0) {
+                    setResult(data.siblings);
+                } else {
+                    setError(`No siblings found for SKU ${skuToSearch.trim()} on ${selectedEnv.name}.`);
+                }
+            } catch (err: any) {
+                console.error("Sibling fetch error:", err);
+                setError(err.message || 'An unexpected error occurred.');
+            } finally {
+                setIsLoading(false);
             }
-        } catch (err: any) {
-            console.error("Sibling fetch error:", err);
-            setError(err.message || 'An unexpected error occurred.');
-        } finally {
-            setIsLoading(false);
-        }
-    };
+        };
+
+        fetchSiblings();
+    }, [skuToSearch, selectedEnvId, apiEnvironments]);
+
 
     const handleCopy = () => {
         if (!result) return;
@@ -75,32 +85,14 @@ const CheckSiblingsModal: React.FC<CheckSiblingsModalProps> = ({ onClose }) => {
             role="dialog"
         >
             <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-2xl m-4 relative">
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold text-slate-800">Check Sibling SKUs</h2>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-xl font-semibold text-slate-800">Sibling SKU Results</h2>
                     <button onClick={onClose} className="p-1 rounded-full text-slate-500 hover:bg-slate-100" aria-label="Close modal">
                         <CloseIcon className="w-6 h-6" />
                     </button>
                 </div>
                 
-                <form onSubmit={handleSubmit} className="flex items-center gap-2 mb-4">
-                    <input
-                        type="text"
-                        value={sku}
-                        onChange={(e) => setSku(e.target.value)}
-                        placeholder="Enter main SKU..."
-                        className="flex-grow px-3 py-2 bg-slate-100 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
-                        required
-                    />
-                    <button
-                        type="submit"
-                        disabled={isLoading}
-                        className="px-4 py-2 rounded-md font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors disabled:bg-indigo-300 disabled:cursor-not-allowed"
-                    >
-                        {isLoading ? 'Searching...' : 'Search'}
-                    </button>
-                </form>
-
-                <div className="min-h-[150px]">
+                <div className="min-h-[200px]">
                     {isLoading && <p className="text-center text-slate-500 py-10">Fetching data...</p>}
                     
                     {error && (
@@ -137,7 +129,7 @@ const CheckSiblingsModal: React.FC<CheckSiblingsModalProps> = ({ onClose }) => {
                                                     Main SKU
                                                 </td>
                                                 <td className="px-6 py-4 text-slate-600">
-                                                    {sku}
+                                                    {skuToSearch}
                                                 </td>
                                             </tr>
                                             {result.map((sibling, index) => (

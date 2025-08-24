@@ -24,6 +24,12 @@ export interface TestDataSet {
     createdAt: string;
 }
 
+export interface ApiEnvironment {
+  id: string;
+  name: string;
+  url: string;
+}
+
 export interface SiblingApiResponse {
   siblings?: string[];
 }

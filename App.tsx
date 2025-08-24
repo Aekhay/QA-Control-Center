@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { LinkItem, CategorizedLinks, TestDataSet, HealthStatus } from './types';
+import { LinkItem, CategorizedLinks, TestDataSet, HealthStatus, ApiEnvironment } from './types';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import LinkCard from './components/LinkCard';
@@ -39,6 +39,9 @@ const App: React.FC = () => {
   const [testDataSets, setTestDataSets] = useState<TestDataSet[]>([]);
   const [activeDataSetId, setActiveDataSetId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'found' | 'not_found' } | null>(null);
+
+  // State for Quick Tools API Environments
+  const [apiEnvironments, setApiEnvironments] = useState<ApiEnvironment[]>([]);
 
   const isLinksView = !['Test Data', 'Quick Tools'].includes(selectedCategory);
 
@@ -120,8 +123,18 @@ const App: React.FC = () => {
         }
     };
     
+    const loadApiEnvironments = () => {
+        try {
+            const savedData = localStorage.getItem('apiEnvironments');
+            if (savedData) setApiEnvironments(JSON.parse(savedData));
+        } catch (error) {
+            console.error("Failed to load API environments from localStorage", error);
+        }
+    };
+
     fetchLinks();
     loadTestData();
+    loadApiEnvironments();
   }, []);
   
   // Initial Health Check
@@ -190,6 +203,11 @@ const App: React.FC = () => {
     localStorage.setItem('activeSkuDataSetId', id);
   };
 
+  const handleApiEnvsChange = (envs: ApiEnvironment[]) => {
+      setApiEnvironments(envs);
+      localStorage.setItem('apiEnvironments', JSON.stringify(envs));
+  }
+
   const toggleDeleteMode = () => {
     setIsDeleteModeActive(!isDeleteModeActive);
     setSelectedLinkIds([]); 
@@ -220,14 +238,14 @@ const App: React.FC = () => {
       };
       acc[category].push(linkWithStatus);
       return acc;
-    }, {});
+    }, {} as CategorizedLinks);
   }, [allLinks, healthStatuses]);
 
   const sidebarCategories = useMemo(() => {
     return ['Sites', ...Object.keys(categorizedLinks).filter(c => c !== 'Sites'), 'Test Data', 'Quick Tools'];
   }, [categorizedLinks]);
 
-  const filteredLinks = useMemo(() => {
+  const filteredLinks = useMemo<CategorizedLinks>(() => {
     if (!isLinksView) return {};
     
     const lowercasedFilter = searchTerm.toLowerCase();
@@ -265,7 +283,7 @@ const App: React.FC = () => {
     return filtered;
   }, [searchTerm, categorizedLinks, selectedCategory, isLinksView]);
 
-  const hasResults = Object.values(filteredLinks).some(links => links.length > 0);
+  const hasResults = useMemo(() => Object.values(filteredLinks).some(links => links.length > 0), [filteredLinks]);
 
   const viewWrapperClasses = viewMode === 'grid'
     ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
@@ -328,7 +346,12 @@ const App: React.FC = () => {
     }
 
     if (selectedCategory === 'Quick Tools') {
-        return <QuickToolsView />;
+        return (
+            <QuickToolsView 
+                apiEnvironments={apiEnvironments}
+                onApiEnvsChange={handleApiEnvsChange}
+            />
+        );
     }
     
     return null;
@@ -336,7 +359,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-100 font-sans text-slate-800 flex justify-center p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-screen-2xl flex bg-white rounded-xl shadow-lg overflow-hidden">
+      <div className="w-full max-w-screen-xl flex bg-white rounded-xl shadow-lg overflow-hidden">
         <Sidebar
           categories={sidebarCategories}
           selectedCategory={selectedCategory}
