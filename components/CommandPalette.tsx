@@ -139,7 +139,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
                             key={isAction ? command.id : command.id}
                             onClick={() => handleItemClick(command)}
                             className={`flex items-center justify-between p-3 rounded-md cursor-pointer ${
-                                isSelected ? 'bg-sky-100' : 'hover:bg-slate-100'
+                                isSelected ? 'bg-indigo-100' : 'hover:bg-slate-100'
                             }`}
                         >
                             <div className="flex items-center gap-3 truncate">
@@ -147,7 +147,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
                                     {isAction ? command.icon : <ExternalLinkIcon className="w-5 h-5"/>}
                                 </div>
                                 <div className="truncate">
-                                    <span className={`font-medium ${isSelected ? 'text-sky-700' : 'text-slate-700'}`}>
+                                    <span className={`font-medium ${isSelected ? 'text-indigo-700' : 'text-slate-700'}`}>
                                         {command.name}
                                     </span>
                                     {!isAction && (

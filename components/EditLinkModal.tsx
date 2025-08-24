@@ -56,7 +56,7 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({ link, onClose, onSave }) 
               id="link-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-100 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="w-full px-3 py-2 bg-slate-100 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
           </div>
@@ -69,7 +69,7 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({ link, onClose, onSave }) 
               id="link-url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="w-full px-3 py-2 bg-slate-100 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="w-full px-3 py-2 bg-slate-100 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
           </div>
@@ -83,7 +83,7 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({ link, onClose, onSave }) 
             </button>
             <button
               type="submit"
-              className="px-4 py-2 rounded-md text-sm font-medium bg-sky-600 text-white hover:bg-sky-700 transition-colors"
+              className="px-4 py-2 rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
             >
               Save Changes
             </button>

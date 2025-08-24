@@ -17,9 +17,9 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
   }, [onClose]);
 
   const isFound = type === 'found';
-  const bgColor = isFound ? 'bg-amber-100' : 'bg-green-100';
-  const borderColor = isFound ? 'border-amber-500' : 'border-green-500';
-  const iconColor = isFound ? 'text-amber-600' : 'text-green-600';
+  const bgColor = isFound ? 'bg-red-50' : 'bg-green-50';
+  const borderColor = isFound ? 'border-red-500' : 'border-green-500';
+  const iconColor = isFound ? 'text-red-600' : 'text-green-600';
   const title = isFound ? 'Warning: SKU in use' : 'Success: SKU available';
 
   return (

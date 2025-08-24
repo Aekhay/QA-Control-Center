@@ -220,14 +220,14 @@ const App: React.FC = () => {
       };
       acc[category].push(linkWithStatus);
       return acc;
-    }, {});
+    }, {} as CategorizedLinks);
   }, [allLinks, healthStatuses]);
 
   const sidebarCategories = useMemo(() => {
     return ['Sites', ...Object.keys(categorizedLinks).filter(c => c !== 'Sites'), 'Test Data', 'Quick Tools'];
   }, [categorizedLinks]);
 
-  const filteredLinks = useMemo(() => {
+  const filteredLinks = useMemo<CategorizedLinks>(() => {
     if (!isLinksView) return {};
     
     const lowercasedFilter = searchTerm.toLowerCase();
@@ -336,7 +336,7 @@ const App: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-slate-100 font-sans text-slate-800 flex justify-center p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-screen-2xl flex bg-white rounded-xl shadow-lg overflow-hidden">
+      <div className="w-full max-w-screen-xl flex bg-white rounded-xl shadow-lg overflow-hidden">
         <Sidebar
           categories={sidebarCategories}
           selectedCategory={selectedCategory}

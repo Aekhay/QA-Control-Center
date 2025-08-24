@@ -1,8 +1,11 @@
+export type HealthStatus = 'checking' | 'online' | 'offline' | 'idle';
+
 export interface LinkItem {
   id: string;
   category: string;
   name: string;
   url: string;
+  healthStatus?: HealthStatus;
 }
 
 export interface CategorizedLinks {
@@ -12,4 +15,15 @@ export interface CategorizedLinks {
 export interface TableData {
   headers: string[];
   rows: string[][];
+}
+
+export interface TestDataSet {
+    id: string;
+    name: string;
+    tableData: TableData;
+    createdAt: string;
+}
+
+export interface SiblingApiResponse {
+  siblings?: string[];
 }

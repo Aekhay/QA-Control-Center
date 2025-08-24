@@ -1,19 +1,95 @@
 import React, { useState, useRef } from 'react';
-import { UploadCloudIcon, AlertTriangleIcon, CheckCircleIcon } from '../constants';
-import { TableData } from '../types';
+import { UploadCloudIcon, AlertTriangleIcon, CheckCircleIcon, TrashIcon } from '../constants';
+import { TableData, TestDataSet } from '../types';
 
 interface TestDataViewProps {
-  tableData: TableData | null;
-  onDataChange: (data: TableData | null) => void;
+  dataSets: TestDataSet[];
+  onDataSetsChange: (data: TestDataSet[]) => void;
+  activeDataSetId: string | null;
+  onSetActive: (id: string) => void;
 }
 
-const TestDataView: React.FC<TestDataViewProps> = ({ tableData, onDataChange }) => {
+const DataSetPreview: React.FC<{ dataSet: TestDataSet }> = ({ dataSet }) => {
+    const [localSearchQuery, setLocalSearchQuery] = useState('');
+    const [searchResult, setSearchResult] = useState<{ message: string; type: 'found' | 'not_found' } | null>(null);
+
+    const handleLocalSearch = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (!localSearchQuery.trim() || !dataSet.tableData) {
+            setSearchResult(null);
+            return;
+        }
+        const query = localSearchQuery.trim();
+        const found = dataSet.tableData.rows.some(row => row.some(cell => cell.trim() === query));
+        
+        setSearchResult({
+            message: found
+                ? `SKU ${query} exists in this dataset.`
+                : `SKU ${query} is not in this dataset.`,
+            type: found ? 'found' : 'not_found'
+        });
+    };
+
+    return (
+        <div className="mt-4 space-y-4">
+             <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
+                <h3 className="text-md font-semibold text-slate-800 mb-2">Quick SKU Check</h3>
+                <form onSubmit={handleLocalSearch} className="flex items-center gap-2">
+                    <input
+                        type="text"
+                        value={localSearchQuery}
+                        onChange={(e) => {
+                            setLocalSearchQuery(e.target.value);
+                            if (searchResult) setSearchResult(null);
+                        }}
+                        placeholder="Enter SKU to validate..."
+                        className="flex-grow px-3 py-2 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                    />
+                    <button
+                        type="submit"
+                        className="px-4 py-2 rounded-md font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                    >
+                        Search
+                    </button>
+                </form>
+                {searchResult && (
+                    <div className={`mt-3 p-3 rounded-md flex items-center gap-3 text-sm border-l-4 ${searchResult.type === 'found' ? 'bg-red-50 border-red-500' : 'bg-green-50 border-green-500'}`}>
+                        <div className={searchResult.type === 'found' ? 'text-red-600' : 'text-green-600'}>
+                            {searchResult.type === 'found' ? <AlertTriangleIcon className="w-5 h-5" /> : <CheckCircleIcon className="w-5 h-5" />}
+                        </div>
+                        <span className="font-medium text-slate-700">{searchResult.message}</span>
+                    </div>
+                )}
+            </div>
+            <div className="overflow-x-auto bg-white rounded-lg shadow-sm border border-slate-200 max-h-[40vh]">
+                <table className="w-full text-sm text-left text-slate-600">
+                    <thead className="text-xs text-slate-700 uppercase bg-slate-100 sticky top-0">
+                        <tr>
+                            {dataSet.tableData.headers.map((header, index) => (
+                                <th key={index} scope="col" className="px-6 py-3">{header}</th>
+                            ))}
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {dataSet.tableData.rows.map((row, rowIndex) => (
+                            <tr key={rowIndex} className="bg-white border-b border-slate-200 hover:bg-slate-50">
+                                {row.map((cell, cellIndex) => (
+                                    <td key={cellIndex} className="px-6 py-4">{cell}</td>
+                                ))}
+                            </tr>
+                        ))}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    );
+};
+
+
+const TestDataView: React.FC<TestDataViewProps> = ({ dataSets, onDataSetsChange, activeDataSetId, onSetActive }) => {
   const [isDragging, setIsDragging] = useState(false);
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [localSearchQuery, setLocalSearchQuery] = useState('');
-  const [searchResult, setSearchResult] = useState<{ message: string; type: 'found' | 'not_found' } | null>(null);
-
-
+  const [viewingDataSetId, setViewingDataSetId] = useState<string | null>(null);
+  
   const parseCSV = (csvText: string): TableData => {
     const rows = csvText.trim().split('\n').map(row => row.split(',').map(cell => cell.trim()));
     const headers = rows.shift() || [];
@@ -25,163 +101,106 @@ const TestDataView: React.FC<TestDataViewProps> = ({ tableData, onDataChange }) 
       const reader = new FileReader();
       reader.onload = (event) => {
         const text = event.target?.result as string;
-        const parsedData = parseCSV(text);
-        onDataChange(parsedData);
+        const newDataSet: TestDataSet = {
+            id: crypto.randomUUID(),
+            name: file.name,
+            tableData: parseCSV(text),
+            createdAt: new Date().toISOString(),
+        };
+        const updatedDataSets = [...dataSets, newDataSet];
+        onDataSetsChange(updatedDataSets);
+        // If it's the first one, make it active
+        if (dataSets.length === 0) {
+            onSetActive(newDataSet.id);
+        }
       };
       reader.readAsText(file);
     } else {
       alert("Please upload a valid .csv file.");
     }
   };
-
-  const handleLocalSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!localSearchQuery.trim() || !tableData) {
-      setSearchResult(null);
-      return;
+  
+  const handleDelete = (idToDelete: string) => {
+    if(window.confirm("Are you sure you want to delete this data set?")) {
+        const updatedDataSets = dataSets.filter(ds => ds.id !== idToDelete);
+        onDataSetsChange(updatedDataSets);
+        if (activeDataSetId === idToDelete) {
+            const newActiveId = updatedDataSets.length > 0 ? updatedDataSets[0].id : null;
+            onSetActive(newActiveId!);
+        }
     }
-    const query = localSearchQuery.trim();
-    const found = tableData.rows.some(row => row.some(cell => cell.trim() === query));
-
-    setSearchResult({
-      message: found
-        ? `SKU ${query} is in Automation Testdata list.`
-        : `SKU ${query} is available for Testing Purpose.`,
-      type: found ? 'found' : 'not_found'
-    });
   };
 
-  const onDragEnter = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(true);
-  };
-  const onDragLeave = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-  };
-  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-  };
+  const onDragEnter = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(true); };
+  const onDragLeave = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); setIsDragging(false); };
+  const onDragOver = (e: React.DragEvent<HTMLDivElement>) => { e.preventDefault(); e.stopPropagation(); };
   const onDrop = (e: React.DragEvent<HTMLDivElement>) => {
-    e.preventDefault();
-    e.stopPropagation();
-    setIsDragging(false);
-    if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      handleFileUpload(e.dataTransfer.files[0]);
-    }
+    e.preventDefault(); e.stopPropagation(); setIsDragging(false);
+    if (e.dataTransfer.files && e.dataTransfer.files[0]) handleFileUpload(e.dataTransfer.files[0]);
   };
 
-  if (!tableData) {
+  if (dataSets.length === 0) {
     return (
-      <div className="text-center">
-        <h2 className="text-2xl font-semibold text-slate-800 mb-4">Upload Test Data</h2>
-        <div 
-          onDrop={onDrop}
-          onDragOver={onDragOver}
-          onDragEnter={onDragEnter}
-          onDragLeave={onDragLeave}
-          className={`border-2 border-dashed rounded-lg p-12 transition-colors ${isDragging ? 'border-sky-500 bg-sky-50' : 'border-slate-300 bg-slate-100'}`}
-        >
-          <UploadCloudIcon className="w-16 h-16 mx-auto text-slate-400 mb-4" />
-          <p className="text-slate-600 mb-2">Drag & drop your CSV file here or</p>
-          <input
-            type="file"
-            id="csv-upload"
-            className="hidden"
-            accept=".csv"
-            onChange={(e) => e.target.files && handleFileUpload(e.target.files[0])}
-          />
-          <label htmlFor="csv-upload" className="font-medium text-sky-600 hover:text-sky-700 cursor-pointer">
-            browse to upload
-          </label>
+        <div className="text-center">
+            <h2 className="text-2xl font-bold text-slate-800 tracking-tight mb-4">Upload Test Data</h2>
+            <div 
+                onDrop={onDrop} onDragOver={onDragOver} onDragEnter={onDragEnter} onDragLeave={onDragLeave}
+                className={`border-2 border-dashed rounded-lg p-12 transition-colors ${isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 bg-slate-100'}`}
+            >
+                <UploadCloudIcon className="w-16 h-16 mx-auto text-slate-400 mb-4" />
+                <p className="text-slate-600 mb-2">Drag & drop your CSV file here or</p>
+                <input type="file" id="csv-upload" className="hidden" accept=".csv" onChange={(e) => e.target.files && handleFileUpload(e.target.files[0])}/>
+                <label htmlFor="csv-upload" className="font-medium text-indigo-600 hover:text-indigo-700 cursor-pointer">browse to upload</label>
+            </div>
         </div>
-      </div>
     );
   }
 
   return (
     <div>
-      <input
-        type="file"
-        ref={fileInputRef}
-        id="csv-replace-upload"
-        className="hidden"
-        accept=".csv"
-        onChange={(e) => {
-            if (e.target.files && e.target.files[0]) {
-                handleFileUpload(e.target.files[0]);
-            }
-            if(e.target) e.target.value = '';
-        }}
-        />
-        
-        <div>
-            <div className="flex justify-between items-center mb-6">
-                <h2 className="text-xl font-semibold text-slate-800">Test Data</h2>
-                <button 
-                  onClick={() => fileInputRef.current?.click()}
-                  className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200 border border-slate-300 transition-colors"
-                >
-                  <UploadCloudIcon className="w-4 h-4 text-sky-600" />
-                  Replace File
-                </button>
-            </div>
-            
-            <div className="mb-6 bg-white p-4 rounded-lg shadow-sm border border-slate-200">
-                <h3 className="text-lg font-semibold text-slate-800 mb-2">Quick SKU Check</h3>
-                <form onSubmit={handleLocalSearch} className="flex items-center gap-2">
+      <div className="flex justify-between items-center mb-6">
+        <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Test Data Sets</h2>
+        <label htmlFor="csv-upload-new" className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 border border-transparent transition-colors cursor-pointer">
+            <UploadCloudIcon className="w-4 h-4" />
+            Upload New File
+        </label>
+        <input type="file" id="csv-upload-new" className="hidden" accept=".csv" onChange={(e) => e.target.files && handleFileUpload(e.target.files[0])}/>
+      </div>
+      
+      <div className="space-y-3">
+        {dataSets.map(ds => (
+          <div key={ds.id} className="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+            <div className="flex justify-between items-center">
+                <div className="flex items-center gap-4">
                     <input
-                        type="text"
-                        value={localSearchQuery}
-                        onChange={(e) => {
-                            setLocalSearchQuery(e.target.value);
-                            if (searchResult) setSearchResult(null);
-                        }}
-                        placeholder="Enter SKU to validate..."
-                        className="flex-grow px-3 py-2 bg-slate-50 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-sky-500"
+                        type="radio"
+                        id={`radio-${ds.id}`}
+                        name="activeDataSet"
+                        checked={activeDataSetId === ds.id}
+                        onChange={() => onSetActive(ds.id)}
+                        className="h-4 w-4 text-indigo-600 border-slate-300 focus:ring-indigo-500"
                     />
-                    <button
-                        type="submit"
-                        className="px-4 py-2 rounded-md font-medium bg-sky-600 text-white hover:bg-sky-700 transition-colors"
-                    >
-                        Search
-                    </button>
-                </form>
-                {searchResult && (
-                    <div className={`mt-4 p-3 rounded-md flex items-center gap-3 text-sm border-l-4 ${searchResult.type === 'found' ? 'bg-amber-50 border-amber-500' : 'bg-green-50 border-green-500'}`}>
-                        <div className={searchResult.type === 'found' ? 'text-amber-600' : 'text-green-600'}>
-                            {searchResult.type === 'found' ? <AlertTriangleIcon className="w-5 h-5" /> : <CheckCircleIcon className="w-5 h-5" />}
-                        </div>
-                        <span className="font-medium text-slate-700">{searchResult.message}</span>
+                    <div>
+                        <label htmlFor={`radio-${ds.id}`} className="font-medium text-slate-800 cursor-pointer">{ds.name}</label>
+                        <p className="text-xs text-slate-500">{ds.tableData.rows.length} rows &bull; Uploaded {new Date(ds.createdAt).toLocaleDateString()}</p>
                     </div>
-                )}
+                </div>
+                <div className="flex items-center gap-2">
+                    <button
+                        onClick={() => setViewingDataSetId(viewingDataSetId === ds.id ? null : ds.id)}
+                        className="px-3 py-1.5 rounded-md text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200"
+                    >
+                        {viewingDataSetId === ds.id ? 'Hide' : 'Preview'}
+                    </button>
+                    <button onClick={() => handleDelete(ds.id)} className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-100 rounded-full">
+                        <TrashIcon className="w-4 h-4" />
+                    </button>
+                </div>
             </div>
-            
-            <h3 className="text-lg font-semibold text-slate-800 mb-2">Data Preview</h3>
-            <div className="overflow-x-auto bg-white rounded-lg shadow-sm border border-slate-200 max-h-[60vh]">
-                <table className="w-full text-sm text-left text-slate-600">
-                    <thead className="text-xs text-slate-700 uppercase bg-slate-100 sticky top-0">
-                        <tr>
-                            {tableData.headers.map((header, index) => (
-                                <th key={index} scope="col" className="px-6 py-3">{header}</th>
-                            ))}
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {tableData.rows.map((row, rowIndex) => (
-                            <tr key={rowIndex} className="bg-white border-b border-slate-200 hover:bg-slate-50">
-                                {row.map((cell, cellIndex) => (
-                                    <td key={cellIndex} className="px-6 py-4">{cell}</td>
-                                ))}
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
-            </div>
-        </div>
+            {viewingDataSetId === ds.id && <DataSetPreview dataSet={ds} />}
+          </div>
+        ))}
+      </div>
     </div>
   );
 };

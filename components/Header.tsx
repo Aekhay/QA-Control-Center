@@ -1,5 +1,5 @@
 import React from 'react';
-import { GridViewIcon, ListViewIcon, PlusIcon, TrashIcon } from '../constants';
+import { GridViewIcon, ListViewIcon, PlusIcon, TrashIcon, RefreshIcon } from '../constants';
 
 interface HeaderProps {
   viewMode: 'grid' | 'list';
@@ -7,28 +7,23 @@ interface HeaderProps {
   onAddClick: () => void;
   isDeleteModeActive: boolean;
   toggleDeleteMode: () => void;
+  onRefresh: () => void;
+  isRefreshing: boolean;
 }
 
-const Header: React.FC<HeaderProps> = ({ viewMode, setViewMode, onAddClick, isDeleteModeActive, toggleDeleteMode }) => {
+const Header: React.FC<HeaderProps> = ({ viewMode, setViewMode, onAddClick, isDeleteModeActive, toggleDeleteMode, onRefresh, isRefreshing }) => {
   return (
-    <header className="bg-white/70 backdrop-blur-lg sticky top-0 z-10 p-4 shadow-sm border-b border-slate-200">
+    <header className="bg-white/80 backdrop-blur-lg sticky top-0 z-10 py-4 border-b border-slate-200 px-4 sm:px-6 lg:px-8">
       <div className="flex justify-between items-center">
-        <h1 className="text-xl font-bold text-slate-800">
-          QA Control Center
+        <h1 className="text-2xl font-bold text-slate-800 tracking-tight">
+          Links
         </h1>
         <div className="flex items-center gap-2">
-          <button
-            onClick={onAddClick}
-            className="p-2 rounded-full text-slate-600 hover:bg-slate-200 transition-colors"
-            aria-label="Add new link"
-          >
-            <PlusIcon className="w-6 h-6" />
-          </button>
-          <div className="flex items-center bg-slate-200 p-1 rounded-full">
+          <div className="flex items-center bg-slate-100 p-1 rounded-full">
             <button
               onClick={() => setViewMode('grid')}
               className={`p-1.5 rounded-full transition-colors ${
-                viewMode === 'grid' ? 'bg-white text-sky-500' : 'text-slate-500'
+                viewMode === 'grid' ? 'bg-white text-indigo-500 shadow-sm' : 'text-slate-500 hover:text-slate-800'
               }`}
               aria-label="Grid view"
             >
@@ -37,24 +32,42 @@ const Header: React.FC<HeaderProps> = ({ viewMode, setViewMode, onAddClick, isDe
             <button
               onClick={() => setViewMode('list')}
               className={`p-1.5 rounded-full transition-colors ${
-                viewMode === 'list' ? 'bg-white text-sky-500' : 'text-slate-500'
+                viewMode === 'list' ? 'bg-white text-indigo-500 shadow-sm' : 'text-slate-500 hover:text-slate-800'
               }`}
               aria-label="List view"
             >
               <ListViewIcon className="w-5 h-5" />
             </button>
           </div>
-          <button
-            onClick={toggleDeleteMode}
-            className={`p-2 rounded-full transition-colors ${
-                isDeleteModeActive
-                ? 'bg-red-100 text-red-500'
-                : 'text-slate-600 hover:bg-slate-200'
-            }`}
-            aria-label="Toggle delete mode"
+          <div className="w-px h-6 bg-slate-200 mx-2"></div>
+          <div className="flex items-center gap-1">
+            <button
+              onClick={onRefresh}
+              disabled={isRefreshing}
+              className="p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              aria-label="Refresh environment statuses"
             >
-            <TrashIcon className="w-6 h-6" />
-          </button>
+              <RefreshIcon className={`w-5 h-5 ${isRefreshing ? 'animate-spin' : ''}`} />
+            </button>
+            <button
+              onClick={onAddClick}
+              className="p-2 rounded-full text-slate-500 hover:bg-slate-100 hover:text-slate-800 transition-colors"
+              aria-label="Add new link"
+            >
+              <PlusIcon className="w-5 h-5" />
+            </button>
+            <button
+              onClick={toggleDeleteMode}
+              className={`p-2 rounded-full transition-colors ${
+                  isDeleteModeActive
+                  ? 'bg-red-100 text-red-600'
+                  : 'text-slate-500 hover:bg-slate-100 hover:text-slate-800'
+              }`}
+              aria-label="Toggle delete mode"
+            >
+              <TrashIcon className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
     </header>
