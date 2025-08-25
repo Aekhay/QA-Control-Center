@@ -240,7 +240,11 @@ const App: React.FC = () => {
 
   const categorizedLinks = useMemo(() => {
     return allLinks.reduce((acc: CategorizedLinks, link) => {
-      const category = link.category || 'Uncategorized';
+      // If a link has no category or an empty category, skip it.
+      if (!link.category || link.category.trim() === '') {
+        return acc;
+      }
+      const category = link.category;
       if (!acc[category]) acc[category] = [];
       
       const linkWithStatus = {
@@ -385,7 +389,7 @@ const App: React.FC = () => {
       </div>
       
       {isLinksView && isAddModalOpen && <AddLinkModal categories={Object.keys(categorizedLinks)} onClose={() => setIsAddModalOpen(false)} onSave={handleSaveNewLink}/>}
-      {isLinksView && editingLink && <EditLinkModal link={editingLink} onClose={() => setEditingLink(null)} onSave={handleUpdateLink}/>}
+      {isLinksView && editingLink && <EditLinkModal link={editingLink} categories={Object.keys(categorizedLinks)} onClose={() => setEditingLink(null)} onSave={handleUpdateLink}/>}
       {isLinksView && isConfirmBulkDeleteOpen && <ConfirmBulkDeleteModal linksToDelete={allLinks.filter(link => selectedLinkIds.includes(link.id))} onClose={() => setIsConfirmBulkDeleteOpen(false)} onConfirm={handleConfirmBulkDelete}/>}
       {isLinksView && isCommandPaletteOpen && <CommandPalette isOpen={isCommandPaletteOpen} onClose={() => setIsCommandPaletteOpen(false)} links={allLinks} onAddLink={() => { setIsCommandPaletteOpen(false); setIsAddModalOpen(true); }} onToggleDeleteMode={() => { setIsCommandPaletteOpen(false); toggleDeleteMode(); }} onSetViewMode={(mode) => { setIsCommandPaletteOpen(false); setViewMode(mode); }} />}
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}

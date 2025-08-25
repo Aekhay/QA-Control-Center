@@ -6,11 +6,13 @@ interface EditLinkModalProps {
   link: LinkItem;
   onClose: () => void;
   onSave: (link: LinkItem) => void;
+  categories: string[];
 }
 
-const EditLinkModal: React.FC<EditLinkModalProps> = ({ link, onClose, onSave }) => {
+const EditLinkModal: React.FC<EditLinkModalProps> = ({ link, onClose, onSave, categories }) => {
   const [name, setName] = useState(link.name);
   const [url, setUrl] = useState(link.url);
+  const [category, setCategory] = useState(link.category);
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -26,7 +28,7 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({ link, onClose, onSave }) 
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({ ...link, name, url });
+    onSave({ ...link, name, url, category });
   };
 
   return (
@@ -60,7 +62,7 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({ link, onClose, onSave }) 
               required
             />
           </div>
-          <div className="mb-6">
+          <div className="mb-4">
             <label htmlFor="link-url" className="block text-sm font-medium text-slate-700 mb-1">
               URL
             </label>
@@ -72,6 +74,23 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({ link, onClose, onSave }) 
               className="w-full px-3 py-2 bg-slate-100 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
+          </div>
+          <div className="mb-6">
+            <label htmlFor="link-category" className="block text-sm font-medium text-slate-700 mb-1">
+              Category
+            </label>
+            <input
+              type="text"
+              id="link-category"
+              list="category-list"
+              value={category}
+              onChange={(e) => setCategory(e.target.value)}
+              className="w-full px-3 py-2 bg-slate-100 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+              required
+            />
+            <datalist id="category-list">
+              {categories.map(cat => <option key={cat} value={cat} />)}
+            </datalist>
           </div>
           <div className="flex justify-end gap-4">
             <button
