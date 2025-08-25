@@ -46,6 +46,18 @@ const App: React.FC = () => {
 
   const isLinksView = !['Test Data', 'Quick Tools'].includes(selectedCategory);
 
+  // --- Data Fetching ---
+  const fetchLinks = useCallback(async () => {
+    try {
+      const linksData = await api.getLinks();
+      setAllLinks(linksData);
+    } catch (error) {
+      console.error("Error loading links:", error);
+      setToast({ message: "Failed to load links from the backend.", type: 'warning' });
+    }
+  }, []);
+
+
   // --- Health Checks ---
   const runHealthChecks = useCallback(async () => {
     setIsRefreshing(true);
@@ -86,33 +98,25 @@ const App: React.FC = () => {
   useEffect(() => {
     const loadInitialData = async () => {
       setLoading(true);
-      try {
-        // Load links from API
-        const linksData = await api.getLinks();
-        setAllLinks(linksData);
+      await fetchLinks();
 
-        // Load test data from localStorage
-        const storedTestData = localStorage.getItem('testDataSets');
-        const testData = storedTestData ? JSON.parse(storedTestData) : [];
-        setTestDataSets(testData);
-        if (testData.length > 0) {
-          setActiveDataSetId(testData[0].id);
-        }
-
-        // Load API environments from localStorage
-        const storedApiEnvs = localStorage.getItem('apiEnvironments');
-        const apiEnvs = storedApiEnvs ? JSON.parse(storedApiEnvs) : [];
-        setApiEnvironments(apiEnvs);
-      } catch (error) {
-        console.error("Error loading links:", error);
-        setToast({ message: "Failed to load links from the backend.", type: 'warning' });
-      } finally {
-        setLoading(false);
+      // Load test data from localStorage
+      const storedTestData = localStorage.getItem('testDataSets');
+      const testData = storedTestData ? JSON.parse(storedTestData) : [];
+      setTestDataSets(testData);
+      if (testData.length > 0) {
+        setActiveDataSetId(testData[0].id);
       }
+
+      // Load API environments from localStorage
+      const storedApiEnvs = localStorage.getItem('apiEnvironments');
+      const apiEnvs = storedApiEnvs ? JSON.parse(storedApiEnvs) : [];
+      setApiEnvironments(apiEnvs);
+      setLoading(false);
     };
 
     loadInitialData();
-  }, []);
+  }, [fetchLinks]);
 
   // Persist test data to localStorage
   useEffect(() => {
@@ -129,7 +133,7 @@ const App: React.FC = () => {
     if (allLinks.length > 0) {
         runHealthChecks();
     }
-  }, [allLinks.length]); // Depends on the number of links to run once
+  }, [allLinks.length, runHealthChecks]); 
   
   // SKU Search Effect
   useEffect(() => {
@@ -151,12 +155,11 @@ const App: React.FC = () => {
     }
   }, [searchTerm, testDataSets, activeDataSetId]);
 
-  const handleUpdateLink = async (updatedLink: LinkItem) => {
+  const handleUpdateLink = async (updatedLinkData: LinkItem) => {
     try {
-      await api.updateLink(updatedLink);
-      const updatedLinks = await api.getLinks();
-      setAllLinks(updatedLinks);
+      await api.updateLink(updatedLinkData);
       setToast({ message: "Link updated successfully.", type: 'success' });
+      await fetchLinks(); // Refetch to get updated data
     } catch (error) {
       console.error("Error updating link:", error);
       setToast({ message: "Failed to update link.", type: 'warning' });
@@ -168,10 +171,9 @@ const App: React.FC = () => {
   const handleSaveNewLink = async (newLinkData: Omit<LinkItem, 'id'>) => {
     try {
       await api.addLink(newLinkData);
-      const updatedLinks = await api.getLinks();
-      setAllLinks(updatedLinks);
       setIsAddModalOpen(false);
       setToast({ message: "Link added successfully.", type: 'success' });
+      await fetchLinks(); // Refetch to get the new link with its real ID
     } catch (error) {
       console.error("Error adding new link:", error);
       setToast({ message: "Failed to save the new link.", type: 'warning' });
@@ -181,9 +183,8 @@ const App: React.FC = () => {
   const handleConfirmBulkDelete = async () => {
     try {
         await api.deleteLinks(selectedLinkIds);
-        const updatedLinks = await api.getLinks();
-        setAllLinks(updatedLinks);
         setToast({ message: `${selectedLinkIds.length} link(s) deleted.`, type: 'success' });
+        await fetchLinks(); // Refetch to get the updated list
     } catch (error) {
         console.error("Error deleting links:", error);
         setToast({ message: "Failed to delete links.", type: 'warning' });
