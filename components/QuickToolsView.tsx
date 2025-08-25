@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import CheckSiblingsModal from './CheckSiblingsModal';
+import SkuSearchModal from './SkuSearchModal';
 import { ApiEnvironment } from '../types';
 import { PlusIcon, PencilIcon, TrashIcon } from '../constants';
 import ApiEnvModal from './ApiEnvModal';
@@ -13,15 +14,21 @@ const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments, onApiE
     const [isEnvModalOpen, setIsEnvModalOpen] = useState(false);
     const [editingEnv, setEditingEnv] = useState<ApiEnvironment | null>(null);
     
-    // State for the sibling checker tool
-    const [sku, setSku] = useState('');
+    // State for the tools
+    const [siblingSku, setSiblingSku] = useState('');
+    const [searchSku, setSearchSku] = useState('');
     const [selectedEnvId, setSelectedEnvId] = useState<string>(apiEnvironments[0]?.id || '');
-    const [isResultsModalOpen, setIsResultsModalOpen] = useState(false);
+
+    const [isSiblingResultsModalOpen, setIsSiblingResultsModalOpen] = useState(false);
+    const [isSkuSearchModalOpen, setIsSkuSearchModalOpen] = useState(false);
+
 
     useEffect(() => {
-        // Set a default selected environment if one isn't set
-        if (apiEnvironments.length > 0 && !selectedEnvId) {
+        // Set a default selected environment if one isn't set or if the selected one is deleted
+        if (apiEnvironments.length > 0 && !apiEnvironments.some(e => e.id === selectedEnvId)) {
             setSelectedEnvId(apiEnvironments[0].id);
+        } else if (apiEnvironments.length === 0) {
+            setSelectedEnvId('');
         }
     }, [apiEnvironments, selectedEnvId]);
 
@@ -37,6 +44,10 @@ const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments, onApiE
             // Add new
             const newEnv = { ...envData, id: crypto.randomUUID() };
             onApiEnvsChange([...apiEnvironments, newEnv]);
+            // If it's the first one, select it
+            if (apiEnvironments.length === 0) {
+                setSelectedEnvId(newEnv.id);
+            }
         }
         setEditingEnv(null);
         setIsEnvModalOpen(false);
@@ -60,8 +71,15 @@ const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments, onApiE
 
     const handleCheckSiblingsSubmit = (e: React.FormEvent) => {
         e.preventDefault();
-        if (sku.trim() && selectedEnvId) {
-            setIsResultsModalOpen(true);
+        if (siblingSku.trim() && selectedEnvId) {
+            setIsSiblingResultsModalOpen(true);
+        }
+    };
+
+    const handleSkuSearchSubmit = (e: React.FormEvent) => {
+        e.preventDefault();
+        if (searchSku.trim() && selectedEnvId) {
+            setIsSkuSearchModalOpen(true);
         }
     };
 
@@ -75,8 +93,8 @@ const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments, onApiE
                     <form onSubmit={handleCheckSiblingsSubmit} className="flex">
                          <input
                             type="text"
-                            value={sku}
-                            onChange={(e) => setSku(e.target.value)}
+                            value={siblingSku}
+                            onChange={(e) => setSiblingSku(e.target.value)}
                             placeholder="Enter main SKU..."
                             className="relative block w-full rounded-l-md border-slate-300 bg-slate-100 px-3 py-2 text-slate-900 placeholder-slate-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                             required
@@ -98,10 +116,48 @@ const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments, onApiE
                         </select>
                         <button
                             type="submit"
-                            disabled={!sku.trim() || apiEnvironments.length === 0}
+                            disabled={!siblingSku.trim() || apiEnvironments.length === 0}
                             className="-ml-px relative inline-flex items-center space-x-2 rounded-r-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-indigo-300 disabled:cursor-not-allowed"
                         >
                             Check Siblings
+                        </button>
+                    </form>
+                </div>
+            </section>
+
+            <section className="mb-8">
+                <h3 className="text-lg font-semibold text-slate-800 mb-4">SKU Search</h3>
+                <div className="bg-white p-6 rounded-lg shadow-sm border border-slate-200">
+                    <form onSubmit={handleSkuSearchSubmit} className="flex">
+                         <input
+                            type="text"
+                            value={searchSku}
+                            onChange={(e) => setSearchSku(e.target.value)}
+                            placeholder="Enter SKU..."
+                            className="relative block w-full rounded-l-md border-slate-300 bg-slate-100 px-3 py-2 text-slate-900 placeholder-slate-500 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                            required
+                            disabled={apiEnvironments.length === 0}
+                        />
+                        <select
+                            value={selectedEnvId}
+                            onChange={(e) => setSelectedEnvId(e.target.value)}
+                            className="-ml-px block rounded-none border-slate-300 bg-slate-100 px-3 py-2 text-slate-900 focus:z-10 focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                            disabled={apiEnvironments.length === 0}
+                        >
+                            {apiEnvironments.length === 0 ? (
+                                <option>No environments configured</option>
+                            ) : (
+                                apiEnvironments.map(env => (
+                                    <option key={env.id} value={env.id}>{env.name}</option>
+                                ))
+                            )}
+                        </select>
+                        <button
+                            type="submit"
+                            disabled={!searchSku.trim() || apiEnvironments.length === 0}
+                            className="-ml-px relative inline-flex items-center space-x-2 rounded-r-md border border-transparent bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2 disabled:bg-indigo-300 disabled:cursor-not-allowed"
+                        >
+                            Search
                         </button>
                     </form>
                 </div>
@@ -121,7 +177,7 @@ const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments, onApiE
                                 <li key={env.id} className="p-4 flex justify-between items-center">
                                     <div>
                                         <p className="font-medium text-slate-800">{env.name}</p>
-                                        <p className="text-sm text-slate-500">{env.url}</p>
+                                        <p className="text-sm text-slate-500 truncate max-w-xs sm:max-w-md">{env.url}</p>
                                     </div>
                                     <div className="flex items-center gap-2">
                                         <button onClick={() => handleOpenEditModal(env)} className="p-2 text-slate-500 hover:text-indigo-600 hover:bg-indigo-100 rounded-full">
@@ -140,11 +196,19 @@ const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments, onApiE
                 </div>
             </section>
 
-            {isResultsModalOpen && (
+            {isSiblingResultsModalOpen && (
                 <CheckSiblingsModal 
-                    onClose={() => setIsResultsModalOpen(false)} 
+                    onClose={() => setIsSiblingResultsModalOpen(false)} 
                     apiEnvironments={apiEnvironments}
-                    skuToSearch={sku}
+                    skuToSearch={siblingSku}
+                    selectedEnvId={selectedEnvId}
+                />
+            )}
+             {isSkuSearchModalOpen && (
+                <SkuSearchModal 
+                    onClose={() => setIsSkuSearchModalOpen(false)} 
+                    apiEnvironments={apiEnvironments}
+                    skuToSearch={searchSku}
                     selectedEnvId={selectedEnvId}
                 />
             )}

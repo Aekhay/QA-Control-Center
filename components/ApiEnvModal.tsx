@@ -57,24 +57,29 @@ const ApiEnvModal: React.FC<ApiEnvModalProps> = ({ onClose, onSave, environmentT
               id="env-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              placeholder="e.g., Staging"
+              placeholder="e.g., Pre-Production"
               className="w-full px-3 py-2 bg-slate-100 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
           </div>
           <div className="mb-6">
             <label htmlFor="env-url" className="block text-sm font-medium text-slate-700 mb-1">
-              Base URL
+              URL
             </label>
             <input
-              type="url"
+              type="text"
               id="env-url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              placeholder="https://api.staging.example.com"
+              placeholder="https://.../findbysku?sku={{sku}}&_fields=siblings"
               className="w-full px-3 py-2 bg-slate-100 rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
               required
             />
+             <p className="mt-2 text-xs text-slate-500">
+              For the Sibling Checker tool, use <code>{'{{sku}}'}</code> as a placeholder for the SKU.
+              <br />
+              Example: <code>https://preprod.ounass.ae/product/findbysku?sku={'{{sku}}'}&_fields=siblings</code>
+            </p>
           </div>
           <div className="flex justify-end gap-4">
             <button

@@ -2,7 +2,6 @@ import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import { LinkItem, CategorizedLinks, TestDataSet, HealthStatus, ApiEnvironment } from './types';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
-import LinkCard from './components/LinkCard';
 import EditLinkModal from './components/EditLinkModal';
 import AddLinkModal from './components/AddLinkModal';
 import ConfirmBulkDeleteModal from './components/ConfirmBulkDeleteModal';
@@ -10,6 +9,7 @@ import CommandPalette from './components/CommandPalette';
 import TestDataView from './components/TestDataView';
 import Toast from './components/Toast';
 import QuickToolsView from './components/QuickToolsView';
+import CategorySection from './components/CategorySection';
 
 const App: React.FC = () => {
   type ViewMode = 'grid' | 'list';
@@ -284,10 +284,6 @@ const App: React.FC = () => {
   }, [searchTerm, categorizedLinks, selectedCategory, isLinksView]);
 
   const hasResults = useMemo(() => Object.values(filteredLinks).some(links => links.length > 0), [filteredLinks]);
-
-  const viewWrapperClasses = viewMode === 'grid'
-    ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
-    : 'flex flex-col gap-2';
     
   const showDeleteBar = isDeleteModeActive && selectedLinkIds.length > 0;
 
@@ -300,32 +296,24 @@ const App: React.FC = () => {
           <h2 className="text-2xl font-semibold text-slate-600">Loading links...</h2>
         </div>
       ) : hasResults ? (
-         Object.entries(filteredLinks).map(([category, links]) => (
-            <section key={category} className="mb-8">
-                {selectedCategory === 'All' && (
-                     <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b-2 border-indigo-500/30">
-                        {category}
-                     </h2>
-                )}
-                <div className={viewWrapperClasses}>
-                    {links.map((link) => {
-                       const card = (
-                         <LinkCard 
-                          key={link.id} 
-                          link={link} 
-                          viewMode={viewMode} 
-                          onEdit={() => setEditingLink(link)}
-                          isDeleteModeActive={isDeleteModeActive}
-                          isSelected={selectedLinkIds.includes(link.id)}
-                          onSelect={handleSelectLink}
-                          animationIndex={animationCounter++}
-                        />
-                       );
-                       return card;
-                    })}
-                </div>
-            </section>
-         ))
+         Object.entries(filteredLinks).map(([category, links]) => {
+            const section = (
+              <CategorySection
+                key={category}
+                category={category}
+                links={links}
+                viewMode={viewMode}
+                onEdit={setEditingLink}
+                isDeleteModeActive={isDeleteModeActive}
+                selectedLinkIds={selectedLinkIds}
+                onSelect={handleSelectLink}
+                showCategoryTitle={selectedCategory === 'All'}
+                animationStartIndex={animationCounter}
+              />
+            );
+            animationCounter += links.length;
+            return section;
+         })
       ) : (
         <div className="text-center py-16">
           <h2 className="text-2xl font-semibold text-slate-600">No results found</h2>
