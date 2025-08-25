@@ -25,7 +25,12 @@ interface GetLinksApiResponse {
 }
 
 export const getLinks = async (): Promise<LinkItem[]> => {
-  const response = await fetch(`${API_BASE_URL}/links`, {
+  // Using a CORS proxy to bypass "Failed to fetch" errors during development.
+  // This is a temporary workaround. The backend (API Gateway) should be configured
+  // to handle CORS for all required methods (GET, POST, PUT, DELETE).
+  const proxiedUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(`${API_BASE_URL}/links`)}`;
+
+  const response = await fetch(proxiedUrl, {
     method: 'GET',
     headers: { 'Content-Type': 'application/json' },
   });
