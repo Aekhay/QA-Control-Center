@@ -153,8 +153,9 @@ const App: React.FC = () => {
 
   const handleUpdateLink = async (updatedLink: LinkItem) => {
     try {
-      const savedLink = await api.updateLink(updatedLink);
-      setAllLinks(allLinks.map(link => link.id === savedLink.id ? savedLink : link));
+      await api.updateLink(updatedLink);
+      const updatedLinks = await api.getLinks();
+      setAllLinks(updatedLinks);
       setToast({ message: "Link updated successfully.", type: 'success' });
     } catch (error) {
       console.error("Error updating link:", error);
@@ -166,8 +167,9 @@ const App: React.FC = () => {
   
   const handleSaveNewLink = async (newLinkData: Omit<LinkItem, 'id'>) => {
     try {
-      const savedLink = await api.addLink(newLinkData);
-      setAllLinks(prevLinks => [...prevLinks, savedLink]);
+      await api.addLink(newLinkData);
+      const updatedLinks = await api.getLinks();
+      setAllLinks(updatedLinks);
       setIsAddModalOpen(false);
       setToast({ message: "Link added successfully.", type: 'success' });
     } catch (error) {
@@ -179,7 +181,8 @@ const App: React.FC = () => {
   const handleConfirmBulkDelete = async () => {
     try {
         await api.deleteLinks(selectedLinkIds);
-        setAllLinks(allLinks.filter(link => !selectedLinkIds.includes(link.id)));
+        const updatedLinks = await api.getLinks();
+        setAllLinks(updatedLinks);
         setToast({ message: `${selectedLinkIds.length} link(s) deleted.`, type: 'success' });
     } catch (error) {
         console.error("Error deleting links:", error);

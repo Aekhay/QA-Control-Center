@@ -25,15 +25,12 @@ interface GetLinksApiResponse {
 }
 
 export const getLinks = async (): Promise<LinkItem[]> => {
-  const targetUrl = `${API_BASE_URL}/links`;
-  // Using a CORS proxy to bypass the browser's same-origin policy for the initial data load.
-  // This is a temporary workaround. The proper long-term solution is to enable CORS on the API Gateway backend,
-  // which will be required for POST, PUT, and DELETE requests to function correctly.
-  const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(targetUrl)}`;
-
-  const response = await fetch(proxyUrl);
+  const response = await fetch(`${API_BASE_URL}/links`, {
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+  });
   const data: GetLinksApiResponse = await handleResponse(response);
-  return data.links;
+  return data.links || []; // Return empty array if links are null/undefined
 };
 
 export const addLink = async (linkData: Omit<LinkItem, 'id'>): Promise<LinkItem> => {
