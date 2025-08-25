@@ -43,6 +43,9 @@ const App: React.FC = () => {
 
   // State for Quick Tools API Environments
   const [apiEnvironments, setApiEnvironments] = useState<ApiEnvironment[]>([]);
+  
+  // State for Sidebar category re-ordering
+  const [categoryOrder, setCategoryOrder] = useState<string[]>([]);
 
   const isLinksView = !['Test Data', 'Quick Tools'].includes(selectedCategory);
 
@@ -112,6 +115,13 @@ const App: React.FC = () => {
       const storedApiEnvs = localStorage.getItem('apiEnvironments');
       const apiEnvs = storedApiEnvs ? JSON.parse(storedApiEnvs) : [];
       setApiEnvironments(apiEnvs);
+
+      // Load category order from localStorage
+      const storedCategoryOrder = localStorage.getItem('categoryOrder');
+      if (storedCategoryOrder) {
+        setCategoryOrder(JSON.parse(storedCategoryOrder));
+      }
+
       setLoading(false);
     };
 
@@ -127,6 +137,13 @@ const App: React.FC = () => {
   useEffect(() => {
     localStorage.setItem('apiEnvironments', JSON.stringify(apiEnvironments));
   }, [apiEnvironments]);
+  
+  // Persist category order to localStorage
+  useEffect(() => {
+    if (categoryOrder.length > 0) {
+      localStorage.setItem('categoryOrder', JSON.stringify(categoryOrder));
+    }
+  }, [categoryOrder]);
   
   // Initial Health Check
   useEffect(() => {
@@ -229,6 +246,14 @@ const App: React.FC = () => {
     setToast({ message: "API Environment deleted.", type: 'success' });
   };
 
+  // Reorder handler
+  const handleReorderCategories = (startIndex: number, endIndex: number) => {
+    const result = Array.from(sidebarCategories); // Use the currently displayed list
+    const [removed] = result.splice(startIndex, 1);
+    result.splice(endIndex, 0, removed);
+    setCategoryOrder(result);
+  };
+
   const toggleDeleteMode = () => {
     setIsDeleteModeActive(!isDeleteModeActive);
     setSelectedLinkIds([]); 
@@ -261,12 +286,36 @@ const App: React.FC = () => {
   }, [allLinks, healthStatuses]);
 
   const sidebarCategories = useMemo(() => {
-    // Dynamically generate categories from the links data, then sort them alphabetically
-    const dynamicCategories = Object.keys(categorizedLinks).sort((a, b) => a.localeCompare(b));
-    
-    // Append the static categories for tools
-    return [...dynamicCategories, 'Test Data', 'Quick Tools'];
-  }, [categorizedLinks]);
+    const dynamicCategories = Object.keys(categorizedLinks);
+    const allCurrentCats = ['All', ...dynamicCategories, 'Test Data', 'Quick Tools'];
+  
+    // If no custom order is set, use a default sort
+    if (categoryOrder.length === 0) {
+      return allCurrentCats.sort((a, b) => {
+        if (a === 'All') return -1;
+        if (b === 'All') return 1;
+        return a.localeCompare(b);
+      });
+    }
+  
+    // Sort based on categoryOrder. Items not in categoryOrder go to the end.
+    const sorted = [...allCurrentCats].sort((a, b) => {
+      const indexA = categoryOrder.indexOf(a);
+      const indexB = categoryOrder.indexOf(b);
+  
+      if (indexA === -1 && indexB === -1) return a.localeCompare(b); // both new, sort alphabetically
+      if (indexA === -1) return 1; // a is new, push to end
+      if (indexB === -1) return -1; // b is new, push to end
+      return indexA - indexB; // both are in the order array
+    });
+  
+    // Sync the order state with any new categories that have appeared
+    if (sorted.length !== categoryOrder.length) {
+      setCategoryOrder(sorted);
+    }
+  
+    return sorted;
+  }, [categorizedLinks, categoryOrder]);
 
   const filteredLinks = useMemo<CategorizedLinks>(() => {
     if (!isLinksView) return {};
@@ -364,6 +413,7 @@ const App: React.FC = () => {
           setSelectedCategory={setSelectedCategory}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
+          onReorder={handleReorderCategories}
         />
         <div className="flex-1 flex flex-col overflow-hidden relative">
           {isLinksView && (
