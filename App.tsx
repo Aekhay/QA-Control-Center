@@ -253,7 +253,11 @@ const App: React.FC = () => {
   }, [allLinks, healthStatuses]);
 
   const sidebarCategories = useMemo(() => {
-    return ['Sites', ...Object.keys(categorizedLinks).filter(c => c !== 'Sites'), 'Test Data', 'Quick Tools'];
+    // Dynamically generate categories from the links data, then sort them alphabetically
+    const dynamicCategories = Object.keys(categorizedLinks).sort((a, b) => a.localeCompare(b));
+    
+    // Append the static categories for tools
+    return [...dynamicCategories, 'Test Data', 'Quick Tools'];
   }, [categorizedLinks]);
 
   const filteredLinks = useMemo<CategorizedLinks>(() => {
