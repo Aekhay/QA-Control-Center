@@ -77,20 +77,20 @@ const SkuSearchModal: React.FC<SkuSearchModalProps> = ({ onClose, apiEnvironment
     
     return (
         <div
-            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
+            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center"
             aria-modal="true"
             role="dialog"
         >
-            <div className="bg-slate-200 rounded-lg shadow-xl w-full max-w-4xl m-4 relative flex flex-col h-[90vh]">
-                <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-slate-300">
-                    <h2 className="text-lg font-semibold text-slate-800">SKU Search Results for "{skuToSearch}"</h2>
-                    <button onClick={onClose} className="p-1 rounded-full text-slate-500 hover:bg-slate-300" aria-label="Close modal">
+            <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-xl w-full max-w-4xl m-4 relative flex flex-col h-[90vh]">
+                <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-gray-700">
+                    <h2 className="text-lg font-semibold text-gray-200">SKU Search Results for "{skuToSearch}"</h2>
+                    <button onClick={onClose} className="p-1 rounded-full text-gray-400 hover:bg-gray-700" aria-label="Close modal">
                         <CloseIcon className="w-6 h-6" />
                     </button>
                 </div>
                 
-                <div className="flex-1 min-h-0 flex flex-col bg-slate-800 p-4">
-                    {isLoading && <p className="text-center text-slate-400 py-10">Fetching data...</p>}
+                <div className="flex-1 min-h-0 flex flex-col bg-gray-900 p-4">
+                    {isLoading && <p className="text-center text-gray-400 py-10">Fetching data...</p>}
                     
                     {error && (
                         <div className="m-auto p-4 text-center text-red-300 bg-red-900/50 border border-red-500/50 rounded-md">

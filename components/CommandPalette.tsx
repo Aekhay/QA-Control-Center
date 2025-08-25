@@ -112,10 +112,10 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-20" aria-modal="true" role="dialog">
-      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-white w-full max-w-xl rounded-lg shadow-2xl mx-4">
+      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-gray-800 w-full max-w-xl rounded-lg shadow-2xl mx-4 border border-gray-700">
         <div className="relative">
-          <CommandIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+          <CommandIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
           <input
             ref={inputRef}
             type="text"
@@ -125,10 +125,10 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
                 setSelectedIndex(0);
             }}
             placeholder="Search links or type a command..."
-            className="w-full pl-12 pr-4 py-4 bg-transparent text-slate-800 focus:outline-none text-lg"
+            className="w-full pl-12 pr-4 py-4 bg-transparent text-gray-200 focus:outline-none text-lg"
           />
         </div>
-        <hr className="border-slate-200" />
+        <hr className="border-gray-700" />
         <div ref={resultsRef} className="max-h-[50vh] overflow-y-auto p-2">
             {filteredCommands.length > 0 ? (
                 filteredCommands.map((command, index) => {
@@ -139,28 +139,28 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
                             key={isAction ? command.id : command.id}
                             onClick={() => handleItemClick(command)}
                             className={`flex items-center justify-between p-3 rounded-md cursor-pointer ${
-                                isSelected ? 'bg-indigo-100' : 'hover:bg-slate-100'
+                                isSelected ? 'bg-sky-500/20' : 'hover:bg-gray-700'
                             }`}
                         >
                             <div className="flex items-center gap-3 truncate">
-                                <div className="text-slate-500">
+                                <div className="text-gray-400">
                                     {isAction ? command.icon : <ExternalLinkIcon className="w-5 h-5"/>}
                                 </div>
                                 <div className="truncate">
-                                    <span className={`font-medium ${isSelected ? 'text-indigo-700' : 'text-slate-700'}`}>
+                                    <span className={`font-medium ${isSelected ? 'text-sky-300' : 'text-gray-300'}`}>
                                         {command.name}
                                     </span>
                                     {!isAction && (
-                                        <span className="ml-2 text-sm text-slate-500">{command.category}</span>
+                                        <span className="ml-2 text-sm text-gray-500">{command.category}</span>
                                     )}
                                 </div>
                             </div>
-                            {isSelected && <CornerDownLeftIcon className="w-5 h-5 text-slate-500 flex-shrink-0"/>}
+                            {isSelected && <CornerDownLeftIcon className="w-5 h-5 text-gray-500 flex-shrink-0"/>}
                         </div>
                     );
                 })
             ) : (
-                <div className="p-4 text-center text-slate-500">
+                <div className="p-4 text-center text-gray-500">
                     No results found.
                 </div>
             )}

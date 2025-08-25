@@ -22,17 +22,17 @@ const ConfirmBulkDeleteModal: React.FC<ConfirmBulkDeleteModalProps> = ({ linksTo
 
   return (
     <div
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
+      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center"
       aria-modal="true"
       role="dialog"
     >
-      <div className="bg-white rounded-lg shadow-xl p-6 w-full max-w-md m-4 relative">
-        <h2 className="text-xl font-semibold text-slate-800 mb-4">Confirm Deletion</h2>
-        <p className="text-slate-600 mb-2">
+      <div className="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md m-4 relative border border-gray-700">
+        <h2 className="text-xl font-semibold text-gray-100 mb-4">Confirm Deletion</h2>
+        <p className="text-gray-400 mb-2">
             Are you sure you want to permanently delete the following <strong>{linksToDelete.length}</strong> item(s)?
         </p>
-        <div className="my-4 max-h-48 overflow-y-auto bg-slate-100 p-3 rounded-md space-y-1 border border-slate-200">
-            <ul className="list-disc list-inside text-sm text-slate-700">
+        <div className="my-4 max-h-48 overflow-y-auto bg-gray-900 p-3 rounded-md space-y-1 border border-gray-700">
+            <ul className="list-disc list-inside text-sm text-gray-300">
                 {linksToDelete.map(link => (
                     <li key={link.id} className="truncate">
                         {link.name}
@@ -40,12 +40,12 @@ const ConfirmBulkDeleteModal: React.FC<ConfirmBulkDeleteModalProps> = ({ linksTo
                 ))}
             </ul>
         </div>
-         <p className="text-sm text-slate-500 mb-6">This action cannot be undone.</p>
+         <p className="text-sm text-gray-500 mb-6">This action cannot be undone.</p>
         <div className="flex justify-end gap-4">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-md text-sm font-medium bg-slate-200 text-slate-800 hover:bg-slate-300 transition-colors"
+            className="px-4 py-2 rounded-md text-sm font-medium bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors"
           >
             Cancel
           </button>

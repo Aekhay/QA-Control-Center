@@ -77,18 +77,18 @@ const Sidebar: React.FC<SidebarProps> = ({ categories, selectedCategory, setSele
 
 
   return (
-    <aside className="w-64 bg-white p-4 border-r border-slate-200 flex flex-col">
+    <aside className="w-64 bg-gray-900 p-4 border-r border-gray-800 flex flex-col">
       <div className="mb-4">
-        <h1 className="text-xl font-bold text-slate-800">QA Control</h1>
+        <h1 className="text-2xl font-bold text-[#9F580A]">QA Control</h1>
       </div>
       <div className="relative mb-4">
-        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-slate-400" />
+        <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
         <input
           type="text"
           placeholder={`Search... (${shortcutHint})`}
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
-          className="pl-10 pr-4 py-2 w-full bg-slate-100 text-slate-800 rounded-lg border border-transparent focus:outline-none focus:ring-2 focus:ring-indigo-500 transition"
+          className="pl-10 pr-4 py-2 w-full bg-gray-800 text-gray-200 placeholder-gray-400 rounded-lg border border-gray-700 focus:outline-none focus:ring-2 focus:ring-sky-500 transition"
         />
       </div>
       
@@ -110,19 +110,19 @@ const Sidebar: React.FC<SidebarProps> = ({ categories, selectedCategory, setSele
                 className={`relative group transition-opacity ${isBeingDragged ? 'opacity-40' : 'opacity-100'}`}
               >
                 {isDragTarget && (
-                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-indigo-500 z-10" />
+                  <div className="absolute top-0 left-0 right-0 h-0.5 bg-sky-400 z-10" />
                 )}
                 <button
                   onClick={() => handleCategorySelect(category)}
                   className={`w-full flex items-center gap-3 px-2 py-2 rounded-md text-sm font-medium transition-all duration-150 relative ${
                     isSelected
-                      ? 'bg-indigo-50 text-indigo-700'
-                      : 'text-slate-600 hover:bg-slate-100'
+                      ? 'bg-[#9CA3AF]/10 text-[#F3F4F6]'
+                      : 'text-gray-400 hover:bg-gray-700/50 hover:text-gray-200'
                   }`}
                 >
-                  <DragHandleIcon className="w-5 h-5 text-slate-400 cursor-grab group-hover:opacity-100 opacity-0 transition-opacity" />
-                  <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-r-full bg-indigo-500 transition-transform duration-200 ${isSelected ? 'scale-y-100' : 'scale-y-0'}`}></div>
-                  <span className={isSelected ? 'text-indigo-600' : 'text-slate-500'}>
+                  <DragHandleIcon className="w-5 h-5 text-gray-600 cursor-grab group-hover:opacity-100 opacity-0 transition-opacity" />
+                  <div className={`absolute left-0 top-0 bottom-0 w-1 rounded-r-full bg-sky-400 transition-transform duration-200 ${isSelected ? 'scale-y-100' : 'scale-y-0'}`}></div>
+                  <span className={isSelected ? 'text-[#9F580A]' : 'text-gray-500'}>
                     {getCategoryIcon(category)}
                   </span>
                   <span className="flex-1 text-left">{category}</span>
@@ -133,7 +133,7 @@ const Sidebar: React.FC<SidebarProps> = ({ categories, selectedCategory, setSele
         </ul>
       </nav>
 
-      <footer className="mt-4 pt-4 border-t border-slate-200 text-xs text-slate-500">
+      <footer className="mt-4 pt-4 border-t border-gray-700 text-xs text-gray-500">
         <p>Link data is persisted in the backend. Other data is saved locally.</p>
       </footer>
     </aside>

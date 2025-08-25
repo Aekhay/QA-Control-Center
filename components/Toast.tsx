@@ -9,30 +9,30 @@ interface ToastProps {
 
 const toastConfig = {
     found: {
-        bgColor: 'bg-red-50',
+        bgColor: 'bg-red-900/80',
         borderColor: 'border-red-500',
-        iconColor: 'text-red-600',
+        iconColor: 'text-red-400',
         title: 'Warning: SKU in use',
         Icon: AlertTriangleIcon
     },
     not_found: {
-        bgColor: 'bg-green-50',
+        bgColor: 'bg-green-900/80',
         borderColor: 'border-green-500',
-        iconColor: 'text-green-600',
+        iconColor: 'text-green-400',
         title: 'Success: SKU available',
         Icon: CheckCircleIcon
     },
     warning: {
-        bgColor: 'bg-yellow-50',
+        bgColor: 'bg-yellow-900/80',
         borderColor: 'border-yellow-500',
-        iconColor: 'text-yellow-600',
+        iconColor: 'text-yellow-400',
         title: 'System Alert',
         Icon: AlertTriangleIcon
     },
     success: {
-        bgColor: 'bg-blue-50',
-        borderColor: 'border-blue-500',
-        iconColor: 'text-blue-600',
+        bgColor: 'bg-sky-900/80',
+        borderColor: 'border-sky-500',
+        iconColor: 'text-sky-400',
         title: 'Success',
         Icon: CheckCircleIcon
     }
@@ -52,7 +52,7 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
 
   return (
     <div
-      className={`fixed bottom-5 right-5 z-50 w-full max-w-sm rounded-lg shadow-lg border-l-4 ${bgColor} ${borderColor} animate-slide-in-up`}
+      className={`fixed bottom-5 right-5 z-50 w-full max-w-sm rounded-lg shadow-2xl border-l-4 backdrop-blur-md ${bgColor} ${borderColor} animate-slide-in-up`}
       role="alert"
     >
       <div className="p-4 flex items-start gap-3">
@@ -60,12 +60,12 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
             <Icon className="w-6 h-6" />
         </div>
         <div className="flex-1">
-          <p className="font-semibold text-slate-800">{title}</p>
-          <p className="text-sm text-slate-600">{message}</p>
+          <p className="font-semibold text-gray-100">{title}</p>
+          <p className="text-sm text-gray-300">{message}</p>
         </div>
         <button
           onClick={onClose}
-          className="p-1 -m-1 rounded-full text-slate-500 hover:bg-black/10"
+          className="p-1 -m-1 rounded-full text-gray-400 hover:bg-white/10"
           aria-label="Dismiss"
         >
           <CloseIcon className="w-5 h-5" />

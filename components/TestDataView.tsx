@@ -33,8 +33,8 @@ const DataSetPreview: React.FC<{ dataSet: TestDataSet }> = ({ dataSet }) => {
 
     return (
         <div className="mt-4 space-y-4">
-             <div className="bg-slate-50 p-4 rounded-lg border border-slate-200">
-                <h3 className="text-md font-semibold text-slate-800 mb-2">Quick SKU Check</h3>
+             <div className="bg-gray-800 p-4 rounded-lg border border-gray-700">
+                <h3 className="text-md font-semibold text-gray-200 mb-2">Quick SKU Check</h3>
                 <form onSubmit={handleLocalSearch} className="flex items-center gap-2">
                     <input
                         type="text"
@@ -44,27 +44,27 @@ const DataSetPreview: React.FC<{ dataSet: TestDataSet }> = ({ dataSet }) => {
                             if (searchResult) setSearchResult(null);
                         }}
                         placeholder="Enter SKU to validate..."
-                        className="flex-grow px-3 py-2 bg-white rounded-md border border-slate-300 focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                        className="flex-grow px-3 py-2 bg-gray-900 text-gray-200 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-sky-500"
                     />
                     <button
                         type="submit"
-                        className="px-4 py-2 rounded-md font-medium bg-indigo-600 text-white hover:bg-indigo-700 transition-colors"
+                        className="px-4 py-2 rounded-md font-semibold bg-sky-600 text-white hover:bg-sky-700 transition-colors"
                     >
                         Search
                     </button>
                 </form>
                 {searchResult && (
-                    <div className={`mt-3 p-3 rounded-md flex items-center gap-3 text-sm border-l-4 ${searchResult.type === 'found' ? 'bg-red-50 border-red-500' : 'bg-green-50 border-green-500'}`}>
-                        <div className={searchResult.type === 'found' ? 'text-red-600' : 'text-green-600'}>
+                    <div className={`mt-3 p-3 rounded-md flex items-center gap-3 text-sm border-l-4 ${searchResult.type === 'found' ? 'bg-red-900/40 border-red-500' : 'bg-green-900/40 border-green-500'}`}>
+                        <div className={searchResult.type === 'found' ? 'text-red-400' : 'text-green-400'}>
                             {searchResult.type === 'found' ? <AlertTriangleIcon className="w-5 h-5" /> : <CheckCircleIcon className="w-5 h-5" />}
                         </div>
-                        <span className="font-medium text-slate-700">{searchResult.message}</span>
+                        <span className="font-medium text-gray-300">{searchResult.message}</span>
                     </div>
                 )}
             </div>
-            <div className="overflow-x-auto bg-white rounded-lg shadow-sm border border-slate-200 max-h-[40vh]">
-                <table className="w-full text-sm text-left text-slate-600">
-                    <thead className="text-xs text-slate-700 uppercase bg-slate-100 sticky top-0">
+            <div className="overflow-x-auto bg-gray-800 rounded-lg border border-gray-700 max-h-[40vh]">
+                <table className="w-full text-sm text-left text-gray-400">
+                    <thead className="text-xs text-gray-300 uppercase bg-gray-700 sticky top-0">
                         <tr>
                             {dataSet.tableData.headers.map((header, index) => (
                                 <th key={index} scope="col" className="px-6 py-3">{header}</th>
@@ -73,7 +73,7 @@ const DataSetPreview: React.FC<{ dataSet: TestDataSet }> = ({ dataSet }) => {
                     </thead>
                     <tbody>
                         {dataSet.tableData.rows.map((row, rowIndex) => (
-                            <tr key={rowIndex} className="bg-white border-b border-slate-200 hover:bg-slate-50">
+                            <tr key={rowIndex} className="bg-gray-800 border-b border-gray-700 hover:bg-gray-700/50">
                                 {row.map((cell, cellIndex) => (
                                     <td key={cellIndex} className="px-6 py-4">{cell}</td>
                                 ))}
@@ -132,15 +132,15 @@ const TestDataView: React.FC<TestDataViewProps> = ({ dataSets, onAdd, onDelete, 
   if (dataSets.length === 0) {
     return (
         <div className="text-center">
-            <h2 className="text-2xl font-bold text-slate-800 tracking-tight mb-4">Upload Test Data</h2>
+            <h2 className="text-2xl font-bold text-gray-200 tracking-tight mb-4">Upload Test Data</h2>
             <div 
                 onDrop={onDrop} onDragOver={onDragOver} onDragEnter={onDragEnter} onDragLeave={onDragLeave}
-                className={`border-2 border-dashed rounded-lg p-12 transition-colors ${isDragging ? 'border-indigo-500 bg-indigo-50' : 'border-slate-300 bg-slate-100'}`}
+                className={`border-2 border-dashed rounded-lg p-12 transition-colors ${isDragging ? 'border-sky-500 bg-sky-900/30' : 'border-gray-600 bg-gray-800'}`}
             >
-                <UploadCloudIcon className="w-16 h-16 mx-auto text-slate-400 mb-4" />
-                <p className="text-slate-600 mb-2">Drag & drop your CSV file here or</p>
+                <UploadCloudIcon className="w-16 h-16 mx-auto text-gray-500 mb-4" />
+                <p className="text-gray-400 mb-2">Drag & drop your CSV file here or</p>
                 <input type="file" id="csv-upload" className="hidden" accept=".csv" onChange={(e) => e.target.files && handleFileUpload(e.target.files[0])}/>
-                <label htmlFor="csv-upload" className="font-medium text-indigo-600 hover:text-indigo-700 cursor-pointer">browse to upload</label>
+                <label htmlFor="csv-upload" className="font-medium text-sky-400 hover:text-sky-300 cursor-pointer">browse to upload</label>
             </div>
         </div>
     );
@@ -149,8 +149,8 @@ const TestDataView: React.FC<TestDataViewProps> = ({ dataSets, onAdd, onDelete, 
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h2 className="text-2xl font-bold text-slate-800 tracking-tight">Test Data Sets</h2>
-        <label htmlFor="csv-upload-new" className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-medium bg-indigo-600 text-white hover:bg-indigo-700 border border-transparent transition-colors cursor-pointer">
+        <h2 className="text-2xl font-bold text-gray-200 tracking-tight">Test Data Sets</h2>
+        <label htmlFor="csv-upload-new" className="flex items-center gap-2 px-3 py-1.5 rounded-md text-sm font-semibold bg-sky-600 text-white hover:bg-sky-700 transition-colors cursor-pointer">
             <UploadCloudIcon className="w-4 h-4" />
             Upload New File
         </label>
@@ -159,7 +159,7 @@ const TestDataView: React.FC<TestDataViewProps> = ({ dataSets, onAdd, onDelete, 
       
       <div className="space-y-3">
         {dataSets.map(ds => (
-          <div key={ds.id} className="bg-white p-4 rounded-lg shadow-sm border border-slate-200">
+          <div key={ds.id} className="bg-gray-800 p-4 rounded-lg border border-gray-700">
             <div className="flex justify-between items-center">
                 <div className="flex items-center gap-4">
                     <input
@@ -168,21 +168,21 @@ const TestDataView: React.FC<TestDataViewProps> = ({ dataSets, onAdd, onDelete, 
                         name="activeDataSet"
                         checked={activeDataSetId === ds.id}
                         onChange={() => onSetActive(ds.id)}
-                        className="h-4 w-4 text-indigo-600 border-slate-300 focus:ring-indigo-500"
+                        className="h-4 w-4 text-sky-600 bg-gray-700 border-gray-600 focus:ring-sky-500"
                     />
                     <div>
-                        <label htmlFor={`radio-${ds.id}`} className="font-medium text-slate-800 cursor-pointer">{ds.name}</label>
-                        <p className="text-xs text-slate-500">{ds.tableData.rows.length} rows &bull; Uploaded {new Date(ds.createdAt).toLocaleDateString()}</p>
+                        <label htmlFor={`radio-${ds.id}`} className="font-medium text-gray-200 cursor-pointer">{ds.name}</label>
+                        <p className="text-xs text-gray-500">{ds.tableData.rows.length} rows &bull; Uploaded {new Date(ds.createdAt).toLocaleDateString()}</p>
                     </div>
                 </div>
                 <div className="flex items-center gap-2">
                     <button
                         onClick={() => setViewingDataSetId(viewingDataSetId === ds.id ? null : ds.id)}
-                        className="px-3 py-1.5 rounded-md text-sm font-medium bg-slate-100 text-slate-700 hover:bg-slate-200"
+                        className="px-3 py-1.5 rounded-md text-sm font-medium bg-gray-700 text-gray-300 hover:bg-gray-600"
                     >
                         {viewingDataSetId === ds.id ? 'Hide' : 'Preview'}
                     </button>
-                    <button onClick={() => handleDelete(ds.id)} className="p-2 text-slate-500 hover:text-red-600 hover:bg-red-100 rounded-full">
+                    <button onClick={() => handleDelete(ds.id)} className="p-2 text-gray-500 hover:text-red-400 hover:bg-red-500/20 rounded-full">
                         <TrashIcon className="w-4 h-4" />
                     </button>
                 </div>

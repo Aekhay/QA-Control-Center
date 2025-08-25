@@ -327,7 +327,7 @@ const App: React.FC = () => {
   const renderMainContent = () => {
     if (isLinksView) {
       return loading ? (
-        <div className="text-center py-16"><h2 className="text-2xl font-semibold text-slate-600">Loading links...</h2></div>
+        <div className="text-center py-16"><h2 className="text-2xl font-semibold text-gray-400">Loading links...</h2></div>
       ) : hasResults ? (
          Object.entries(filteredLinks).map(([category, links]) => {
             const section = (
@@ -344,8 +344,8 @@ const App: React.FC = () => {
          })
       ) : (
         <div className="text-center py-16">
-          <h2 className="text-2xl font-semibold text-slate-600">No results found</h2>
-          <p className="mt-2 text-slate-500">Try adjusting your search or filter.</p>
+          <h2 className="text-2xl font-semibold text-gray-400">No results found</h2>
+          <p className="mt-2 text-gray-500">Try adjusting your search or filter.</p>
         </div>
       );
     }
@@ -374,8 +374,8 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-slate-100 font-sans text-slate-800 flex justify-center p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-screen-xl flex bg-white rounded-xl shadow-lg overflow-hidden">
+    <div className="min-h-screen bg-gray-900 font-sans text-gray-200 flex justify-center p-4 sm:p-6 lg:p-8">
+      <div className="w-full max-w-screen-xl flex bg-gray-800 rounded-xl shadow-2xl shadow-black/30 overflow-hidden">
         <Sidebar
           categories={sidebarCategories}
           selectedCategory={selectedCategory}
@@ -384,7 +384,7 @@ const App: React.FC = () => {
           setSearchTerm={setSearchTerm}
           onReorder={handleReorderCategories}
         />
-        <div className="flex-1 flex flex-col overflow-hidden relative">
+        <div className="flex-1 flex flex-col overflow-hidden relative bg-gray-900">
           {isLinksView && (
               <Header
                   viewMode={viewMode} setViewMode={setViewMode}
@@ -398,11 +398,11 @@ const App: React.FC = () => {
           </main>
           
           {isLinksView && showDeleteBar && (
-            <div className="absolute bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm z-20 border-t border-slate-200">
+            <div className="absolute bottom-0 left-0 right-0 bg-gray-800/80 backdrop-blur-sm z-20 border-t border-gray-700">
                 <div className="px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
-                    <span className="font-medium text-slate-700">{selectedLinkIds.length} item(s) selected</span>
+                    <span className="font-medium text-gray-300">{selectedLinkIds.length} item(s) selected</span>
                     <div className="flex items-center gap-4">
-                        <button onClick={() => setSelectedLinkIds([])} className="px-4 py-2 rounded-md text-sm font-medium bg-slate-200 text-slate-800 hover:bg-slate-300 transition-colors">Cancel</button>
+                        <button onClick={() => setSelectedLinkIds([])} className="px-4 py-2 rounded-md text-sm font-medium bg-gray-600 text-gray-100 hover:bg-gray-500 transition-colors">Cancel</button>
                         <button onClick={() => setIsConfirmBulkDeleteOpen(true)} className="px-4 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors">Delete Selected</button>
                     </div>
                 </div>

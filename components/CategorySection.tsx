@@ -32,7 +32,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   return (
     <section className="mb-8">
       {showCategoryTitle && (
-        <h2 className="text-xl font-semibold text-slate-800 mb-4 pb-2 border-b-2 border-indigo-500/30">
+        <h2 className="text-xl font-semibold text-gray-200 mb-4 pb-2 border-b-2 border-sky-500/30">
           {category}
         </h2>
       )}
