@@ -4,8 +4,8 @@ import { TableData, TestDataSet } from '../types';
 
 interface TestDataViewProps {
   dataSets: TestDataSet[];
-  onAdd: (dataSet: Omit<TestDataSet, 'id'>) => Promise<void>;
-  onDelete: (id: string) => Promise<void>;
+  onAdd: (dataSet: Omit<TestDataSet, 'id'>) => void;
+  onDelete: (id: string) => void;
   activeDataSetId: string | null;
   onSetActive: (id: string) => void;
 }

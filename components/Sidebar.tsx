@@ -84,7 +84,7 @@ const Sidebar: React.FC<SidebarProps> = ({ categories, selectedCategory, setSele
       </nav>
 
       <footer className="mt-4 pt-4 border-t border-slate-200 text-xs text-slate-500">
-        <p>All data is persisted in the backend.</p>
+        <p>Link data is persisted in the backend. Other data is saved locally.</p>
       </footer>
     </aside>
   );

@@ -7,9 +7,9 @@ import ApiEnvModal from './ApiEnvModal';
 
 interface QuickToolsViewProps {
     apiEnvironments: ApiEnvironment[];
-    onAdd: (env: Omit<ApiEnvironment, 'id'>) => Promise<void>;
-    onUpdate: (env: ApiEnvironment) => Promise<void>;
-    onDelete: (id: string) => Promise<void>;
+    onAdd: (env: Omit<ApiEnvironment, 'id'>) => void;
+    onUpdate: (env: ApiEnvironment) => void;
+    onDelete: (id: string) => void;
 }
 
 const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments, onAdd, onUpdate, onDelete }) => {

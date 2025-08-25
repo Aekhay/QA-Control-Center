@@ -82,47 +82,47 @@ const App: React.FC = () => {
   }, [isLinksView]);
 
 
-  // Data loading from backend
+  // Data loading
   useEffect(() => {
-    const loadAllData = async () => {
+    const loadInitialData = async () => {
       setLoading(true);
       try {
-        const [linksData, testData, apiEnvs] = await Promise.all([
-          api.getLinks(),
-          api.getTestDataSets(),
-          api.getApiEnvironments(),
-        ]);
-        
-        setAllLinks(linksData || []);
-        setTestDataSets(testData || []);
-        setApiEnvironments(apiEnvs || []);
+        // Load links from API
+        const linksData = await api.getLinks();
+        setAllLinks(linksData);
 
-        if (testData && testData.length > 0) {
-            setActiveDataSetId(testData[0].id);
+        // Load test data from localStorage
+        const storedTestData = localStorage.getItem('testDataSets');
+        const testData = storedTestData ? JSON.parse(storedTestData) : [];
+        setTestDataSets(testData);
+        if (testData.length > 0) {
+          setActiveDataSetId(testData[0].id);
         }
-        
+
+        // Load API environments from localStorage
+        const storedApiEnvs = localStorage.getItem('apiEnvironments');
+        const apiEnvs = storedApiEnvs ? JSON.parse(storedApiEnvs) : [];
+        setApiEnvironments(apiEnvs);
       } catch (error) {
-        console.error("Error loading initial data:", error);
-        setToast({ message: "Failed to load data from the backend. Using local fallback for links.", type: 'warning' });
-        try {
-            const response = await fetch('/links.json');
-            if (!response.ok) throw new Error('Local links.json not found');
-            const localLinks: Omit<LinkItem, 'id' | 'healthStatus'>[] = await response.json();
-            const linksWithIds = localLinks.map(link => ({
-                ...link,
-                id: crypto.randomUUID(),
-            }));
-            setAllLinks(linksWithIds);
-        } catch (fallbackError) {
-            console.error("Error loading fallback links:", fallbackError);
-        }
+        console.error("Error loading links:", error);
+        setToast({ message: "Failed to load links from the backend.", type: 'warning' });
       } finally {
         setLoading(false);
       }
     };
 
-    loadAllData();
+    loadInitialData();
   }, []);
+
+  // Persist test data to localStorage
+  useEffect(() => {
+    localStorage.setItem('testDataSets', JSON.stringify(testDataSets));
+  }, [testDataSets]);
+
+  // Persist API environments to localStorage
+  useEffect(() => {
+    localStorage.setItem('apiEnvironments', JSON.stringify(apiEnvironments));
+  }, [apiEnvironments]);
   
   // Initial Health Check
   useEffect(() => {
@@ -191,66 +191,38 @@ const App: React.FC = () => {
     }
   };
   
-  // Test Data Handlers
-  const handleAddTestDataSet = async (newDataSet: Omit<TestDataSet, 'id'>) => {
-      try {
-          const savedDataSet = await api.addTestDataSet(newDataSet);
-          setTestDataSets(prev => [...prev, savedDataSet]);
-          if (testDataSets.length === 0) setActiveDataSetId(savedDataSet.id);
-          setToast({ message: "Test data set uploaded.", type: 'success' });
-      } catch (error) {
-          console.error("Error adding test data set:", error);
-          setToast({ message: "Failed to upload test data.", type: 'warning' });
-      }
+  // Test Data Handlers (localStorage)
+  const handleAddTestDataSet = (newDataSet: Omit<TestDataSet, 'id'>) => {
+    const dataSetWithId = { ...newDataSet, id: Date.now().toString() };
+    setTestDataSets(prev => [...prev, dataSetWithId]);
+    if (testDataSets.length === 0) setActiveDataSetId(dataSetWithId.id);
+    setToast({ message: "Test data set uploaded.", type: 'success' });
   };
 
-  const handleDeleteTestDataSet = async (id: string) => {
-      try {
-          await api.deleteTestDataSet(id);
-          const updatedDataSets = testDataSets.filter(ds => ds.id !== id);
-          setTestDataSets(updatedDataSets);
-          if (activeDataSetId === id) {
-              setActiveDataSetId(updatedDataSets.length > 0 ? updatedDataSets[0].id : null);
-          }
-          setToast({ message: "Test data set deleted.", type: 'success' });
-      } catch (error) {
-          console.error("Error deleting test data set:", error);
-          setToast({ message: "Failed to delete test data.", type: 'warning' });
-      }
-  };
-
-  // API Environment Handlers
-  const handleAddApiEnv = async (envData: Omit<ApiEnvironment, 'id'>) => {
-    try {
-      const newEnv = await api.addApiEnvironment(envData);
-      setApiEnvironments(prev => [...prev, newEnv]);
-      setToast({ message: "API Environment added.", type: 'success' });
-    } catch (error) {
-      console.error("Error adding API environment:", error);
-      setToast({ message: "Failed to add environment.", type: 'warning' });
+  const handleDeleteTestDataSet = (id: string) => {
+    const updatedDataSets = testDataSets.filter(ds => ds.id !== id);
+    setTestDataSets(updatedDataSets);
+    if (activeDataSetId === id) {
+        setActiveDataSetId(updatedDataSets.length > 0 ? updatedDataSets[0].id : null);
     }
+    setToast({ message: "Test data set deleted.", type: 'success' });
   };
 
-  const handleUpdateApiEnv = async (envData: ApiEnvironment) => {
-    try {
-      const updatedEnv = await api.updateApiEnvironment(envData);
-      setApiEnvironments(prev => prev.map(e => e.id === updatedEnv.id ? updatedEnv : e));
-      setToast({ message: "API Environment updated.", type: 'success' });
-    } catch (error) {
-      console.error("Error updating API environment:", error);
-      setToast({ message: "Failed to update environment.", type: 'warning' });
-    }
+  // API Environment Handlers (localStorage)
+  const handleAddApiEnv = (envData: Omit<ApiEnvironment, 'id'>) => {
+    const newEnv = { ...envData, id: Date.now().toString() };
+    setApiEnvironments(prev => [...prev, newEnv]);
+    setToast({ message: "API Environment added.", type: 'success' });
+  };
+
+  const handleUpdateApiEnv = (envData: ApiEnvironment) => {
+    setApiEnvironments(prev => prev.map(e => e.id === envData.id ? envData : e));
+    setToast({ message: "API Environment updated.", type: 'success' });
   };
   
-  const handleDeleteApiEnv = async (id: string) => {
-    try {
-      await api.deleteApiEnvironment(id);
-      setApiEnvironments(prev => prev.filter(e => e.id !== id));
-      setToast({ message: "API Environment deleted.", type: 'success' });
-    } catch (error) {
-      console.error("Error deleting API environment:", error);
-      setToast({ message: "Failed to delete environment.", type: 'warning' });
-    }
+  const handleDeleteApiEnv = (id: string) => {
+    setApiEnvironments(prev => prev.filter(e => e.id !== id));
+    setToast({ message: "API Environment deleted.", type: 'success' });
   };
 
   const toggleDeleteMode = () => {
