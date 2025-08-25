@@ -11,6 +11,7 @@ import Toast from './components/Toast';
 import QuickToolsView from './components/QuickToolsView';
 import CategorySection from './components/CategorySection';
 import * as api from './api';
+import { DEFAULT_API_ENVIRONMENTS } from './environments';
 
 const App: React.FC = () => {
   type ViewMode = 'grid' | 'list';
@@ -41,8 +42,8 @@ const App: React.FC = () => {
   const [activeDataSetId, setActiveDataSetId] = useState<string | null>(null);
   const [toast, setToast] = useState<{ message: string; type: 'found' | 'not_found' | 'warning' | 'success' } | null>(null);
 
-  // State for Quick Tools API Environments
-  const [apiEnvironments, setApiEnvironments] = useState<ApiEnvironment[]>([]);
+  // API environments are now read from a static file
+  const [apiEnvironments] = useState<ApiEnvironment[]>(DEFAULT_API_ENVIRONMENTS);
   
   // State for Sidebar category re-ordering
   const [categoryOrder, setCategoryOrder] = useState<string[]>([]);
@@ -111,11 +112,6 @@ const App: React.FC = () => {
         setActiveDataSetId(testData[0].id);
       }
 
-      // Load API environments from localStorage
-      const storedApiEnvs = localStorage.getItem('apiEnvironments');
-      const apiEnvs = storedApiEnvs ? JSON.parse(storedApiEnvs) : [];
-      setApiEnvironments(apiEnvs);
-
       // Load category order from localStorage
       const storedCategoryOrder = localStorage.getItem('categoryOrder');
       if (storedCategoryOrder) {
@@ -127,16 +123,6 @@ const App: React.FC = () => {
 
     loadInitialData();
   }, [fetchLinks]);
-
-  // Persist test data to localStorage
-  useEffect(() => {
-    localStorage.setItem('testDataSets', JSON.stringify(testDataSets));
-  }, [testDataSets]);
-
-  // Persist API environments to localStorage
-  useEffect(() => {
-    localStorage.setItem('apiEnvironments', JSON.stringify(apiEnvironments));
-  }, [apiEnvironments]);
   
   // Persist category order to localStorage
   useEffect(() => {
@@ -215,7 +201,9 @@ const App: React.FC = () => {
   // Test Data Handlers (localStorage)
   const handleAddTestDataSet = (newDataSet: Omit<TestDataSet, 'id'>) => {
     const dataSetWithId = { ...newDataSet, id: Date.now().toString() };
-    setTestDataSets(prev => [...prev, dataSetWithId]);
+    const updatedDataSets = [...testDataSets, dataSetWithId];
+    setTestDataSets(updatedDataSets);
+    localStorage.setItem('testDataSets', JSON.stringify(updatedDataSets));
     if (testDataSets.length === 0) setActiveDataSetId(dataSetWithId.id);
     setToast({ message: "Test data set uploaded.", type: 'success' });
   };
@@ -223,27 +211,11 @@ const App: React.FC = () => {
   const handleDeleteTestDataSet = (id: string) => {
     const updatedDataSets = testDataSets.filter(ds => ds.id !== id);
     setTestDataSets(updatedDataSets);
+    localStorage.setItem('testDataSets', JSON.stringify(updatedDataSets));
     if (activeDataSetId === id) {
         setActiveDataSetId(updatedDataSets.length > 0 ? updatedDataSets[0].id : null);
     }
     setToast({ message: "Test data set deleted.", type: 'success' });
-  };
-
-  // API Environment Handlers (localStorage)
-  const handleAddApiEnv = (envData: Omit<ApiEnvironment, 'id'>) => {
-    const newEnv = { ...envData, id: Date.now().toString() };
-    setApiEnvironments(prev => [...prev, newEnv]);
-    setToast({ message: "API Environment added.", type: 'success' });
-  };
-
-  const handleUpdateApiEnv = (envData: ApiEnvironment) => {
-    setApiEnvironments(prev => prev.map(e => e.id === envData.id ? envData : e));
-    setToast({ message: "API Environment updated.", type: 'success' });
-  };
-  
-  const handleDeleteApiEnv = (id: string) => {
-    setApiEnvironments(prev => prev.filter(e => e.id !== id));
-    setToast({ message: "API Environment deleted.", type: 'success' });
   };
 
   // Reorder handler
@@ -394,9 +366,6 @@ const App: React.FC = () => {
         return (
             <QuickToolsView 
                 apiEnvironments={apiEnvironments}
-                onAdd={handleAddApiEnv}
-                onUpdate={handleUpdateApiEnv}
-                onDelete={handleDeleteApiEnv}
             />
         );
     }
