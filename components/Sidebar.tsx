@@ -84,9 +84,7 @@ const Sidebar: React.FC<SidebarProps> = ({ categories, selectedCategory, setSele
       </nav>
 
       <footer className="mt-4 pt-4 border-t border-slate-200 text-xs text-slate-500">
-        <p>
-            To restore default data, clear the application's local storage.
-        </p>
+        <p>All data is persisted in the backend.</p>
       </footer>
     </aside>
   );

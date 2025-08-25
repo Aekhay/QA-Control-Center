@@ -3,9 +3,40 @@ import { AlertTriangleIcon, CheckCircleIcon, CloseIcon } from '../constants';
 
 interface ToastProps {
   message: string;
-  type: 'found' | 'not_found';
+  type: 'found' | 'not_found' | 'warning' | 'success';
   onClose: () => void;
 }
+
+const toastConfig = {
+    found: {
+        bgColor: 'bg-red-50',
+        borderColor: 'border-red-500',
+        iconColor: 'text-red-600',
+        title: 'Warning: SKU in use',
+        Icon: AlertTriangleIcon
+    },
+    not_found: {
+        bgColor: 'bg-green-50',
+        borderColor: 'border-green-500',
+        iconColor: 'text-green-600',
+        title: 'Success: SKU available',
+        Icon: CheckCircleIcon
+    },
+    warning: {
+        bgColor: 'bg-yellow-50',
+        borderColor: 'border-yellow-500',
+        iconColor: 'text-yellow-600',
+        title: 'System Alert',
+        Icon: AlertTriangleIcon
+    },
+    success: {
+        bgColor: 'bg-blue-50',
+        borderColor: 'border-blue-500',
+        iconColor: 'text-blue-600',
+        title: 'Success',
+        Icon: CheckCircleIcon
+    }
+};
 
 const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
   useEffect(() => {
@@ -16,11 +47,8 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
     return () => clearTimeout(timer);
   }, [onClose]);
 
-  const isFound = type === 'found';
-  const bgColor = isFound ? 'bg-red-50' : 'bg-green-50';
-  const borderColor = isFound ? 'border-red-500' : 'border-green-500';
-  const iconColor = isFound ? 'text-red-600' : 'text-green-600';
-  const title = isFound ? 'Warning: SKU in use' : 'Success: SKU available';
+  const config = toastConfig[type] || toastConfig.warning;
+  const { bgColor, borderColor, iconColor, title, Icon } = config;
 
   return (
     <div
@@ -29,11 +57,7 @@ const Toast: React.FC<ToastProps> = ({ message, type, onClose }) => {
     >
       <div className="p-4 flex items-start gap-3">
         <div className={`flex-shrink-0 ${iconColor}`}>
-          {isFound ? (
-            <AlertTriangleIcon className="w-6 h-6" />
-          ) : (
-            <CheckCircleIcon className="w-6 h-6" />
-          )}
+            <Icon className="w-6 h-6" />
         </div>
         <div className="flex-1">
           <p className="font-semibold text-slate-800">{title}</p>

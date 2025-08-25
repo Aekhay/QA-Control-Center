@@ -1,10 +1,11 @@
-import React, { useState, useRef } from 'react';
+import React, { useState } from 'react';
 import { UploadCloudIcon, AlertTriangleIcon, CheckCircleIcon, TrashIcon } from '../constants';
 import { TableData, TestDataSet } from '../types';
 
 interface TestDataViewProps {
   dataSets: TestDataSet[];
-  onDataSetsChange: (data: TestDataSet[]) => void;
+  onAdd: (dataSet: Omit<TestDataSet, 'id'>) => Promise<void>;
+  onDelete: (id: string) => Promise<void>;
   activeDataSetId: string | null;
   onSetActive: (id: string) => void;
 }
@@ -86,7 +87,7 @@ const DataSetPreview: React.FC<{ dataSet: TestDataSet }> = ({ dataSet }) => {
 };
 
 
-const TestDataView: React.FC<TestDataViewProps> = ({ dataSets, onDataSetsChange, activeDataSetId, onSetActive }) => {
+const TestDataView: React.FC<TestDataViewProps> = ({ dataSets, onAdd, onDelete, activeDataSetId, onSetActive }) => {
   const [isDragging, setIsDragging] = useState(false);
   const [viewingDataSetId, setViewingDataSetId] = useState<string | null>(null);
   
@@ -101,18 +102,12 @@ const TestDataView: React.FC<TestDataViewProps> = ({ dataSets, onDataSetsChange,
       const reader = new FileReader();
       reader.onload = (event) => {
         const text = event.target?.result as string;
-        const newDataSet: TestDataSet = {
-            id: crypto.randomUUID(),
+        const newDataSet: Omit<TestDataSet, 'id'> = {
             name: file.name,
             tableData: parseCSV(text),
             createdAt: new Date().toISOString(),
         };
-        const updatedDataSets = [...dataSets, newDataSet];
-        onDataSetsChange(updatedDataSets);
-        // If it's the first one, make it active
-        if (dataSets.length === 0) {
-            onSetActive(newDataSet.id);
-        }
+        onAdd(newDataSet);
       };
       reader.readAsText(file);
     } else {
@@ -122,12 +117,7 @@ const TestDataView: React.FC<TestDataViewProps> = ({ dataSets, onDataSetsChange,
   
   const handleDelete = (idToDelete: string) => {
     if(window.confirm("Are you sure you want to delete this data set?")) {
-        const updatedDataSets = dataSets.filter(ds => ds.id !== idToDelete);
-        onDataSetsChange(updatedDataSets);
-        if (activeDataSetId === idToDelete) {
-            const newActiveId = updatedDataSets.length > 0 ? updatedDataSets[0].id : null;
-            onSetActive(newActiveId!);
-        }
+        onDelete(idToDelete);
     }
   };
 

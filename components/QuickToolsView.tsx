@@ -7,10 +7,12 @@ import ApiEnvModal from './ApiEnvModal';
 
 interface QuickToolsViewProps {
     apiEnvironments: ApiEnvironment[];
-    onApiEnvsChange: (envs: ApiEnvironment[]) => void;
+    onAdd: (env: Omit<ApiEnvironment, 'id'>) => Promise<void>;
+    onUpdate: (env: ApiEnvironment) => Promise<void>;
+    onDelete: (id: string) => Promise<void>;
 }
 
-const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments, onApiEnvsChange }) => {
+const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments, onAdd, onUpdate, onDelete }) => {
     const [isEnvModalOpen, setIsEnvModalOpen] = useState(false);
     const [editingEnv, setEditingEnv] = useState<ApiEnvironment | null>(null);
     
@@ -35,19 +37,9 @@ const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments, onApiE
 
     const handleSaveEnv = (envData: Omit<ApiEnvironment, 'id'>) => {
         if (editingEnv) {
-            // Update existing
-            const updatedEnvs = apiEnvironments.map(env =>
-                env.id === editingEnv.id ? { ...editingEnv, ...envData } : env
-            );
-            onApiEnvsChange(updatedEnvs);
+            onUpdate({ ...editingEnv, ...envData });
         } else {
-            // Add new
-            const newEnv = { ...envData, id: crypto.randomUUID() };
-            onApiEnvsChange([...apiEnvironments, newEnv]);
-            // If it's the first one, select it
-            if (apiEnvironments.length === 0) {
-                setSelectedEnvId(newEnv.id);
-            }
+            onAdd(envData);
         }
         setEditingEnv(null);
         setIsEnvModalOpen(false);
@@ -55,7 +47,7 @@ const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments, onApiE
 
     const handleDeleteEnv = (id: string) => {
         if (window.confirm("Are you sure you want to delete this environment?")) {
-            onApiEnvsChange(apiEnvironments.filter(env => env.id !== id));
+            onDelete(id);
         }
     };
 

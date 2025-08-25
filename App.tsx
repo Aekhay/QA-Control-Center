@@ -10,6 +10,7 @@ import TestDataView from './components/TestDataView';
 import Toast from './components/Toast';
 import QuickToolsView from './components/QuickToolsView';
 import CategorySection from './components/CategorySection';
+import * as api from './api';
 
 const App: React.FC = () => {
   type ViewMode = 'grid' | 'list';
@@ -38,7 +39,7 @@ const App: React.FC = () => {
   // State for Test Data and Toasts
   const [testDataSets, setTestDataSets] = useState<TestDataSet[]>([]);
   const [activeDataSetId, setActiveDataSetId] = useState<string | null>(null);
-  const [toast, setToast] = useState<{ message: string; type: 'found' | 'not_found' } | null>(null);
+  const [toast, setToast] = useState<{ message: string; type: 'found' | 'not_found' | 'warning' | 'success' } | null>(null);
 
   // State for Quick Tools API Environments
   const [apiEnvironments, setApiEnvironments] = useState<ApiEnvironment[]>([]);
@@ -50,7 +51,6 @@ const App: React.FC = () => {
     setIsRefreshing(true);
     const siteLinks = allLinks.filter(link => link.category === 'Sites');
     
-    // Set all to checking
     setHealthStatuses(prev => {
         const newState = {...prev};
         siteLinks.forEach(link => newState[link.id] = 'checking');
@@ -59,8 +59,6 @@ const App: React.FC = () => {
 
     await Promise.all(siteLinks.map(async (link) => {
         try {
-            // Using 'no-cors' to check for reachability without running into CORS issues.
-            // This won't give a status code but tells us if the server responded.
             await fetch(link.url, { mode: 'no-cors', signal: AbortSignal.timeout(5000) });
             setHealthStatuses(prev => ({...prev, [link.id]: 'online'}));
         } catch (error) {
@@ -76,9 +74,7 @@ const App: React.FC = () => {
     const handleKeyDown = (e: KeyboardEvent) => {
         if ((e.metaKey || e.ctrlKey) && e.key === 'k') {
             e.preventDefault();
-            if (isLinksView) {
-                setIsCommandPaletteOpen(true);
-            }
+            if (isLinksView) setIsCommandPaletteOpen(true);
         }
     };
     window.addEventListener('keydown', handleKeyDown);
@@ -86,55 +82,46 @@ const App: React.FC = () => {
   }, [isLinksView]);
 
 
-  // Data loading and persistence
+  // Data loading from backend
   useEffect(() => {
-    const fetchLinks = async () => {
+    const loadAllData = async () => {
+      setLoading(true);
       try {
-        let linksData: LinkItem[];
-        const savedLinks = localStorage.getItem('qaCenterLinks');
+        const [linksData, testData, apiEnvs] = await Promise.all([
+          api.getLinks(),
+          api.getTestDataSets(),
+          api.getApiEnvironments(),
+        ]);
+        
+        setAllLinks(linksData || []);
+        setTestDataSets(testData || []);
+        setApiEnvironments(apiEnvs || []);
 
-        if (savedLinks) {
-          linksData = JSON.parse(savedLinks);
-        } else {
-          const response = await fetch('./links.json');
-          if (!response.ok) throw new Error('Failed to load default links data');
-          const defaultLinks: Omit<LinkItem, 'id'>[] = await response.json();
-          linksData = defaultLinks.map(link => ({...link, id: crypto.randomUUID() }));
-          localStorage.setItem('qaCenterLinks', JSON.stringify(linksData));
+        if (testData && testData.length > 0) {
+            setActiveDataSetId(testData[0].id);
         }
-        setAllLinks(linksData);
+        
       } catch (error) {
-        console.error("Error loading links:", error);
+        console.error("Error loading initial data:", error);
+        setToast({ message: "Failed to load data from the backend. Using local fallback for links.", type: 'warning' });
+        try {
+            const response = await fetch('/links.json');
+            if (!response.ok) throw new Error('Local links.json not found');
+            const localLinks: Omit<LinkItem, 'id' | 'healthStatus'>[] = await response.json();
+            const linksWithIds = localLinks.map(link => ({
+                ...link,
+                id: crypto.randomUUID(),
+            }));
+            setAllLinks(linksWithIds);
+        } catch (fallbackError) {
+            console.error("Error loading fallback links:", fallbackError);
+        }
       } finally {
         setLoading(false);
       }
     };
 
-    const loadTestData = () => {
-        try {
-            const savedData = localStorage.getItem('skuTestDataSet');
-            if (savedData) setTestDataSets(JSON.parse(savedData));
-
-            const savedActiveId = localStorage.getItem('activeSkuDataSetId');
-            if (savedActiveId) setActiveDataSetId(savedActiveId);
-
-        } catch (error) {
-            console.error("Failed to load test data from localStorage", error);
-        }
-    };
-    
-    const loadApiEnvironments = () => {
-        try {
-            const savedData = localStorage.getItem('apiEnvironments');
-            if (savedData) setApiEnvironments(JSON.parse(savedData));
-        } catch (error) {
-            console.error("Failed to load API environments from localStorage", error);
-        }
-    };
-
-    fetchLinks();
-    loadTestData();
-    loadApiEnvironments();
+    loadAllData();
   }, []);
   
   // Initial Health Check
@@ -146,7 +133,7 @@ const App: React.FC = () => {
   
   // SKU Search Effect
   useEffect(() => {
-    const SKU_REGEX = /^\d{8,}$/; // Simple regex for SKU-like numbers (8+ digits)
+    const SKU_REGEX = /^\d{8,}$/; 
 
     if (SKU_REGEX.test(searchTerm.trim()) && testDataSets.length > 0) {
         const activeDataSet = testDataSets.find(ds => ds.id === activeDataSetId);
@@ -164,49 +151,107 @@ const App: React.FC = () => {
     }
   }, [searchTerm, testDataSets, activeDataSetId]);
 
-  const handleUpdateLink = (updatedLink: LinkItem) => {
-    const updatedLinks = allLinks.map(link => link.id === updatedLink.id ? updatedLink : link);
-    setAllLinks(updatedLinks);
-    localStorage.setItem('qaCenterLinks', JSON.stringify(updatedLinks));
-    setEditingLink(null);
-  };
-  
-  const handleSaveNewLink = (newLinkData: Omit<LinkItem, 'id'>) => {
-    const newLink = { ...newLinkData, id: crypto.randomUUID() };
-    const updatedLinks = [...allLinks, newLink];
-    setAllLinks(updatedLinks);
-    localStorage.setItem('qaCenterLinks', JSON.stringify(updatedLinks));
-    setIsAddModalOpen(false);
-  };
-  
-  const handleConfirmBulkDelete = () => {
-    const updatedLinks = allLinks.filter(link => !selectedLinkIds.includes(link.id));
-    setAllLinks(updatedLinks);
-    localStorage.setItem('qaCenterLinks', JSON.stringify(updatedLinks));
-    
-    setIsConfirmBulkDeleteOpen(false);
-    setSelectedLinkIds([]);
-    setIsDeleteModeActive(false);
-  };
-  
-  const handleDataSetsChange = (dataSets: TestDataSet[]) => {
-    setTestDataSets(dataSets);
-    localStorage.setItem('skuTestDataSet', JSON.stringify(dataSets));
-    if (dataSets.length === 0) {
-        setActiveDataSetId(null);
-        localStorage.removeItem('activeSkuDataSetId');
+  const handleUpdateLink = async (updatedLink: LinkItem) => {
+    try {
+      const savedLink = await api.updateLink(updatedLink);
+      setAllLinks(allLinks.map(link => link.id === savedLink.id ? savedLink : link));
+      setToast({ message: "Link updated successfully.", type: 'success' });
+    } catch (error) {
+      console.error("Error updating link:", error);
+      setToast({ message: "Failed to update link.", type: 'warning' });
+    } finally {
+      setEditingLink(null);
     }
   };
   
-  const handleSetActiveDataSet = (id: string) => {
-    setActiveDataSetId(id);
-    localStorage.setItem('activeSkuDataSetId', id);
+  const handleSaveNewLink = async (newLinkData: Omit<LinkItem, 'id'>) => {
+    try {
+      const savedLink = await api.addLink(newLinkData);
+      setAllLinks(prevLinks => [...prevLinks, savedLink]);
+      setIsAddModalOpen(false);
+      setToast({ message: "Link added successfully.", type: 'success' });
+    } catch (error) {
+      console.error("Error adding new link:", error);
+      setToast({ message: "Failed to save the new link.", type: 'warning' });
+    }
+  };
+  
+  const handleConfirmBulkDelete = async () => {
+    try {
+        await api.deleteLinks(selectedLinkIds);
+        setAllLinks(allLinks.filter(link => !selectedLinkIds.includes(link.id)));
+        setToast({ message: `${selectedLinkIds.length} link(s) deleted.`, type: 'success' });
+    } catch (error) {
+        console.error("Error deleting links:", error);
+        setToast({ message: "Failed to delete links.", type: 'warning' });
+    } finally {
+        setIsConfirmBulkDeleteOpen(false);
+        setSelectedLinkIds([]);
+        setIsDeleteModeActive(false);
+    }
+  };
+  
+  // Test Data Handlers
+  const handleAddTestDataSet = async (newDataSet: Omit<TestDataSet, 'id'>) => {
+      try {
+          const savedDataSet = await api.addTestDataSet(newDataSet);
+          setTestDataSets(prev => [...prev, savedDataSet]);
+          if (testDataSets.length === 0) setActiveDataSetId(savedDataSet.id);
+          setToast({ message: "Test data set uploaded.", type: 'success' });
+      } catch (error) {
+          console.error("Error adding test data set:", error);
+          setToast({ message: "Failed to upload test data.", type: 'warning' });
+      }
   };
 
-  const handleApiEnvsChange = (envs: ApiEnvironment[]) => {
-      setApiEnvironments(envs);
-      localStorage.setItem('apiEnvironments', JSON.stringify(envs));
-  }
+  const handleDeleteTestDataSet = async (id: string) => {
+      try {
+          await api.deleteTestDataSet(id);
+          const updatedDataSets = testDataSets.filter(ds => ds.id !== id);
+          setTestDataSets(updatedDataSets);
+          if (activeDataSetId === id) {
+              setActiveDataSetId(updatedDataSets.length > 0 ? updatedDataSets[0].id : null);
+          }
+          setToast({ message: "Test data set deleted.", type: 'success' });
+      } catch (error) {
+          console.error("Error deleting test data set:", error);
+          setToast({ message: "Failed to delete test data.", type: 'warning' });
+      }
+  };
+
+  // API Environment Handlers
+  const handleAddApiEnv = async (envData: Omit<ApiEnvironment, 'id'>) => {
+    try {
+      const newEnv = await api.addApiEnvironment(envData);
+      setApiEnvironments(prev => [...prev, newEnv]);
+      setToast({ message: "API Environment added.", type: 'success' });
+    } catch (error) {
+      console.error("Error adding API environment:", error);
+      setToast({ message: "Failed to add environment.", type: 'warning' });
+    }
+  };
+
+  const handleUpdateApiEnv = async (envData: ApiEnvironment) => {
+    try {
+      const updatedEnv = await api.updateApiEnvironment(envData);
+      setApiEnvironments(prev => prev.map(e => e.id === updatedEnv.id ? updatedEnv : e));
+      setToast({ message: "API Environment updated.", type: 'success' });
+    } catch (error) {
+      console.error("Error updating API environment:", error);
+      setToast({ message: "Failed to update environment.", type: 'warning' });
+    }
+  };
+  
+  const handleDeleteApiEnv = async (id: string) => {
+    try {
+      await api.deleteApiEnvironment(id);
+      setApiEnvironments(prev => prev.filter(e => e.id !== id));
+      setToast({ message: "API Environment deleted.", type: 'success' });
+    } catch (error) {
+      console.error("Error deleting API environment:", error);
+      setToast({ message: "Failed to delete environment.", type: 'warning' });
+    }
+  };
 
   const toggleDeleteMode = () => {
     setIsDeleteModeActive(!isDeleteModeActive);
@@ -220,18 +265,12 @@ const App: React.FC = () => {
         : [...prev, linkId]
     );
   };
-  
-  const handleCancelSelection = () => {
-    setSelectedLinkIds([]);
-  };
-
 
   const categorizedLinks = useMemo(() => {
     return allLinks.reduce((acc: CategorizedLinks, link) => {
       const category = link.category || 'Uncategorized';
-      if (!acc[category]) {
-        acc[category] = [];
-      }
+      if (!acc[category]) acc[category] = [];
+      
       const linkWithStatus = {
           ...link,
           healthStatus: link.category === 'Sites' ? healthStatuses[link.id] || 'idle' : undefined
@@ -250,11 +289,8 @@ const App: React.FC = () => {
     
     const lowercasedFilter = searchTerm.toLowerCase();
     
-    // If the search term is an SKU, don't filter the links list
     const SKU_REGEX = /^\d{8,}$/;
-    if (SKU_REGEX.test(searchTerm.trim())) {
-        return categorizedLinks;
-    }
+    if (SKU_REGEX.test(searchTerm.trim())) return categorizedLinks;
 
     let linksToFilter = { ...categorizedLinks };
 
@@ -264,9 +300,7 @@ const App: React.FC = () => {
         return {};
     }
 
-    if (!searchTerm.trim()) {
-      return linksToFilter;
-    }
+    if (!searchTerm.trim()) return linksToFilter;
     
     const filtered: CategorizedLinks = {};
 
@@ -276,37 +310,26 @@ const App: React.FC = () => {
         link.url.toLowerCase().includes(lowercasedFilter) ||
         link.category.toLowerCase().includes(lowercasedFilter)
       );
-      if (matchingLinks.length > 0) {
-        filtered[category] = matchingLinks;
-      }
+      if (matchingLinks.length > 0) filtered[category] = matchingLinks;
     }
     return filtered;
   }, [searchTerm, categorizedLinks, selectedCategory, isLinksView]);
 
   const hasResults = useMemo(() => Object.values(filteredLinks).some(links => links.length > 0), [filteredLinks]);
-    
   const showDeleteBar = isDeleteModeActive && selectedLinkIds.length > 0;
-
   let animationCounter = 0;
 
   const renderMainContent = () => {
     if (isLinksView) {
       return loading ? (
-        <div className="text-center py-16">
-          <h2 className="text-2xl font-semibold text-slate-600">Loading links...</h2>
-        </div>
+        <div className="text-center py-16"><h2 className="text-2xl font-semibold text-slate-600">Loading links...</h2></div>
       ) : hasResults ? (
          Object.entries(filteredLinks).map(([category, links]) => {
             const section = (
               <CategorySection
-                key={category}
-                category={category}
-                links={links}
-                viewMode={viewMode}
-                onEdit={setEditingLink}
-                isDeleteModeActive={isDeleteModeActive}
-                selectedLinkIds={selectedLinkIds}
-                onSelect={handleSelectLink}
+                key={category} category={category} links={links} viewMode={viewMode}
+                onEdit={setEditingLink} isDeleteModeActive={isDeleteModeActive}
+                selectedLinkIds={selectedLinkIds} onSelect={handleSelectLink}
                 showCategoryTitle={selectedCategory === 'All'}
                 animationStartIndex={animationCounter}
               />
@@ -326,9 +349,10 @@ const App: React.FC = () => {
       return (
         <TestDataView 
             dataSets={testDataSets}
-            onDataSetsChange={handleDataSetsChange}
+            onAdd={handleAddTestDataSet}
+            onDelete={handleDeleteTestDataSet}
             activeDataSetId={activeDataSetId}
-            onSetActive={handleSetActiveDataSet}
+            onSetActive={setActiveDataSetId}
         />
       );
     }
@@ -337,7 +361,9 @@ const App: React.FC = () => {
         return (
             <QuickToolsView 
                 apiEnvironments={apiEnvironments}
-                onApiEnvsChange={handleApiEnvsChange}
+                onAdd={handleAddApiEnv}
+                onUpdate={handleUpdateApiEnv}
+                onDelete={handleDeleteApiEnv}
             />
         );
     }
@@ -358,13 +384,10 @@ const App: React.FC = () => {
         <div className="flex-1 flex flex-col overflow-hidden relative">
           {isLinksView && (
               <Header
-                  viewMode={viewMode}
-                  setViewMode={setViewMode}
+                  viewMode={viewMode} setViewMode={setViewMode}
                   onAddClick={() => setIsAddModalOpen(true)}
-                  isDeleteModeActive={isDeleteModeActive}
-                  toggleDeleteMode={toggleDeleteMode}
-                  onRefresh={runHealthChecks}
-                  isRefreshing={isRefreshing}
+                  isDeleteModeActive={isDeleteModeActive} toggleDeleteMode={toggleDeleteMode}
+                  onRefresh={runHealthChecks} isRefreshing={isRefreshing}
               />
           )}
           <main key={selectedCategory} className={`flex-1 overflow-y-auto animate-fade-in px-4 sm:px-6 lg:px-8 py-8 ${showDeleteBar ? 'pb-24' : ''}`}>
@@ -374,22 +397,10 @@ const App: React.FC = () => {
           {isLinksView && showDeleteBar && (
             <div className="absolute bottom-0 left-0 right-0 bg-white/80 backdrop-blur-sm z-20 border-t border-slate-200">
                 <div className="px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
-                    <span className="font-medium text-slate-700">
-                        {selectedLinkIds.length} item(s) selected
-                    </span>
+                    <span className="font-medium text-slate-700">{selectedLinkIds.length} item(s) selected</span>
                     <div className="flex items-center gap-4">
-                        <button
-                            onClick={handleCancelSelection}
-                            className="px-4 py-2 rounded-md text-sm font-medium bg-slate-200 text-slate-800 hover:bg-slate-300 transition-colors"
-                        >
-                            Cancel
-                        </button>
-                        <button
-                            onClick={() => setIsConfirmBulkDeleteOpen(true)}
-                            className="px-4 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors"
-                        >
-                            Delete Selected
-                        </button>
+                        <button onClick={() => setSelectedLinkIds([])} className="px-4 py-2 rounded-md text-sm font-medium bg-slate-200 text-slate-800 hover:bg-slate-300 transition-colors">Cancel</button>
+                        <button onClick={() => setIsConfirmBulkDeleteOpen(true)} className="px-4 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors">Delete Selected</button>
                     </div>
                 </div>
             </div>
@@ -397,53 +408,11 @@ const App: React.FC = () => {
         </div>
       </div>
       
-      {isLinksView && isAddModalOpen && (
-        <AddLinkModal
-            categories={Object.keys(categorizedLinks)}
-            onClose={() => setIsAddModalOpen(false)}
-            onSave={handleSaveNewLink}
-        />
-      )}
-      {isLinksView && editingLink && (
-        <EditLinkModal
-            link={editingLink}
-            onClose={() => setEditingLink(null)}
-            onSave={handleUpdateLink}
-        />
-      )}
-      {isLinksView && isConfirmBulkDeleteOpen && (
-        <ConfirmBulkDeleteModal
-            linksToDelete={allLinks.filter(link => selectedLinkIds.includes(link.id))}
-            onClose={() => setIsConfirmBulkDeleteOpen(false)}
-            onConfirm={handleConfirmBulkDelete}
-        />
-      )}
-      {isLinksView && isCommandPaletteOpen && (
-        <CommandPalette 
-            isOpen={isCommandPaletteOpen}
-            onClose={() => setIsCommandPaletteOpen(false)}
-            links={allLinks}
-            onAddLink={() => {
-                setIsCommandPaletteOpen(false);
-                setIsAddModalOpen(true);
-            }}
-            onToggleDeleteMode={() => {
-                setIsCommandPaletteOpen(false);
-                toggleDeleteMode();
-            }}
-            onSetViewMode={(mode) => {
-                setIsCommandPaletteOpen(false);
-                setViewMode(mode);
-            }}
-        />
-      )}
-       {toast && (
-        <Toast
-          message={toast.message}
-          type={toast.type}
-          onClose={() => setToast(null)}
-        />
-      )}
+      {isLinksView && isAddModalOpen && <AddLinkModal categories={Object.keys(categorizedLinks)} onClose={() => setIsAddModalOpen(false)} onSave={handleSaveNewLink}/>}
+      {isLinksView && editingLink && <EditLinkModal link={editingLink} onClose={() => setEditingLink(null)} onSave={handleUpdateLink}/>}
+      {isLinksView && isConfirmBulkDeleteOpen && <ConfirmBulkDeleteModal linksToDelete={allLinks.filter(link => selectedLinkIds.includes(link.id))} onClose={() => setIsConfirmBulkDeleteOpen(false)} onConfirm={handleConfirmBulkDelete}/>}
+      {isLinksView && isCommandPaletteOpen && <CommandPalette isOpen={isCommandPaletteOpen} onClose={() => setIsCommandPaletteOpen(false)} links={allLinks} onAddLink={() => { setIsCommandPaletteOpen(false); setIsAddModalOpen(true); }} onToggleDeleteMode={() => { setIsCommandPaletteOpen(false); toggleDeleteMode(); }} onSetViewMode={(mode) => { setIsCommandPaletteOpen(false); setViewMode(mode); }} />}
+      {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
 };
