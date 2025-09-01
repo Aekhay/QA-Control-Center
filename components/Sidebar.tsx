@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { SearchIcon, GlobeIcon, DatabaseIcon, WrenchIcon, ExternalLinkIcon, DragHandleIcon } from '../constants';
+import { SearchIcon, GlobeIcon, DatabaseIcon, WrenchIcon, ExternalLinkIcon, DragHandleIcon, BrowserProfileIcon } from '../constants';
 
 interface SidebarProps {
   categories: string[];
@@ -20,6 +20,9 @@ const getCategoryIcon = (category: string) => {
   if (category === 'Quick Tools') {
     return <WrenchIcon className="w-5 h-5" />;
   }
+  if (category === 'Chrome Profiles') {
+    return <BrowserProfileIcon className="w-5 h-5" />;
+  }
   return <ExternalLinkIcon className="w-5 h-5" />;
 };
 
@@ -37,7 +40,7 @@ const Sidebar: React.FC<SidebarProps> = ({ categories, selectedCategory, setSele
   }, []);
   
   const handleCategorySelect = (category: string) => {
-    if (['Test Data', 'Quick Tools'].includes(category)) {
+    if (['Test Data', 'Quick Tools', 'Chrome Profiles'].includes(category)) {
       setSearchTerm('');
     }
     setSelectedCategory(category);

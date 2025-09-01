@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { LinkItem, CategorizedLinks, TestDataSet, HealthStatus, ApiEnvironment } from './types';
+import { LinkItem, CategorizedLinks, TestDataSet, HealthStatus, ApiEnvironment, ChromeProfile } from './types';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import EditLinkModal from './components/EditLinkModal';
@@ -10,6 +10,7 @@ import TestDataView from './components/TestDataView';
 import Toast from './components/Toast';
 import QuickToolsView from './components/QuickToolsView';
 import CategorySection from './components/CategorySection';
+import ProfileManagerView from './components/ProfileManagerView';
 import * as api from './api';
 import { DEFAULT_API_ENVIRONMENTS } from './environments';
 
@@ -44,11 +45,14 @@ const App: React.FC = () => {
 
   // API environments are now read from a static file
   const [apiEnvironments] = useState<ApiEnvironment[]>(DEFAULT_API_ENVIRONMENTS);
+
+  // State for Chrome Profiles
+  const [chromeProfiles, setChromeProfiles] = useState<ChromeProfile[]>([]);
   
   // State for Sidebar category re-ordering
   const [categoryOrder, setCategoryOrder] = useState<string[]>([]);
 
-  const isLinksView = !['Test Data', 'Quick Tools'].includes(selectedCategory);
+  const isLinksView = !['Test Data', 'Quick Tools', 'Chrome Profiles'].includes(selectedCategory);
 
   // --- Data Fetching ---
   const fetchLinks = useCallback(async () => {
@@ -111,6 +115,10 @@ const App: React.FC = () => {
       if (testData.length > 0) {
         setActiveDataSetId(testData[0].id);
       }
+      
+      // Load chrome profiles from localStorage
+      const storedProfiles = localStorage.getItem('chromeProfiles');
+      setChromeProfiles(storedProfiles ? JSON.parse(storedProfiles) : []);
 
       // Load category order from localStorage
       const storedCategoryOrder = localStorage.getItem('categoryOrder');
@@ -130,6 +138,11 @@ const App: React.FC = () => {
       localStorage.setItem('categoryOrder', JSON.stringify(categoryOrder));
     }
   }, [categoryOrder]);
+  
+  // Persist chrome profiles to localStorage
+  useEffect(() => {
+    localStorage.setItem('chromeProfiles', JSON.stringify(chromeProfiles));
+  }, [chromeProfiles]);
   
   // Initial Health Check
   useEffect(() => {
@@ -157,6 +170,15 @@ const App: React.FC = () => {
         });
     }
   }, [searchTerm, testDataSets, activeDataSetId]);
+
+  const handleCopyToClipboard = (text: string, message: string) => {
+    navigator.clipboard.writeText(text).then(() => {
+        setToast({ message, type: 'success' });
+    }).catch(err => {
+        console.error('Failed to copy: ', err);
+        setToast({ message: "Failed to copy text.", type: 'warning' });
+    });
+  };
 
   const handleUpdateLink = async (updatedLinkData: LinkItem) => {
     try {
@@ -217,6 +239,25 @@ const App: React.FC = () => {
     }
     setToast({ message: "Test data set deleted.", type: 'success' });
   };
+  
+  // Chrome Profile Handlers
+  const handleAddProfile = (newProfileData: Omit<ChromeProfile, 'id'>) => {
+    const profileWithId = { ...newProfileData, id: Date.now().toString() };
+    setChromeProfiles(prev => [...prev, profileWithId]);
+    setToast({ message: `Profile "${profileWithId.name}" added.`, type: 'success' });
+  };
+  
+  const handleUpdateProfile = (updatedProfile: ChromeProfile) => {
+    setChromeProfiles(prev => prev.map(p => p.id === updatedProfile.id ? updatedProfile : p));
+    setToast({ message: `Profile "${updatedProfile.name}" updated.`, type: 'success' });
+  };
+  
+  const handleDeleteProfile = (id: string) => {
+    if (window.confirm("Are you sure you want to delete this profile? This cannot be undone.")) {
+        setChromeProfiles(prev => prev.filter(p => p.id !== id));
+        setToast({ message: "Profile deleted.", type: 'success' });
+    }
+  };
 
   // Reorder handler
   const handleReorderCategories = (startIndex: number, endIndex: number) => {
@@ -259,7 +300,7 @@ const App: React.FC = () => {
 
   const sidebarCategories = useMemo(() => {
     const dynamicCategories = Object.keys(categorizedLinks);
-    const allCurrentCats = ['All', ...dynamicCategories, 'Test Data', 'Quick Tools'];
+    const allCurrentCats = ['All', ...dynamicCategories, 'Test Data', 'Quick Tools', 'Chrome Profiles'];
   
     // If no custom order is set, use a default sort
     if (categoryOrder.length === 0) {
@@ -337,6 +378,8 @@ const App: React.FC = () => {
                 selectedLinkIds={selectedLinkIds} onSelect={handleSelectLink}
                 showCategoryTitle={selectedCategory === 'All'}
                 animationStartIndex={animationCounter}
+                chromeProfiles={chromeProfiles}
+                onCopyToClipboard={handleCopyToClipboard}
               />
             );
             animationCounter += links.length;
@@ -368,6 +411,17 @@ const App: React.FC = () => {
                 apiEnvironments={apiEnvironments}
             />
         );
+    }
+
+    if (selectedCategory === 'Chrome Profiles') {
+      return (
+          <ProfileManagerView
+              profiles={chromeProfiles}
+              onAdd={handleAddProfile}
+              onUpdate={handleUpdateProfile}
+              onDelete={handleDeleteProfile}
+          />
+      );
     }
     
     return null;

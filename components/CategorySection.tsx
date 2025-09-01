@@ -1,5 +1,5 @@
 import React from 'react';
-import { LinkItem } from '../types';
+import { LinkItem, ChromeProfile } from '../types';
 import LinkCard from './LinkCard';
 
 interface CategorySectionProps {
@@ -12,6 +12,8 @@ interface CategorySectionProps {
   onSelect: (id: string) => void;
   showCategoryTitle: boolean;
   animationStartIndex: number;
+  chromeProfiles: ChromeProfile[];
+  onCopyToClipboard: (text: string, message: string) => void;
 }
 
 const CategorySection: React.FC<CategorySectionProps> = ({
@@ -24,6 +26,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   onSelect,
   showCategoryTitle,
   animationStartIndex,
+  chromeProfiles,
+  onCopyToClipboard,
 }) => {
   const viewWrapperClasses = viewMode === 'grid'
     ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
@@ -47,6 +51,8 @@ const CategorySection: React.FC<CategorySectionProps> = ({
             isSelected={selectedLinkIds.includes(link.id)}
             onSelect={onSelect}
             animationIndex={animationStartIndex + index}
+            chromeProfiles={chromeProfiles}
+            onCopyToClipboard={onCopyToClipboard}
           />
         ))}
       </div>
