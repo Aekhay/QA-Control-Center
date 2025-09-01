@@ -14,6 +14,7 @@ interface CategorySectionProps {
   animationStartIndex: number;
   chromeProfiles: ChromeProfile[];
   onCopyToClipboard: (text: string, message: string) => void;
+  onOpenWithProfile: (url: string, profileName: string) => void;
 }
 
 const CategorySection: React.FC<CategorySectionProps> = ({
@@ -28,6 +29,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   animationStartIndex,
   chromeProfiles,
   onCopyToClipboard,
+  onOpenWithProfile,
 }) => {
   const viewWrapperClasses = viewMode === 'grid'
     ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
@@ -53,6 +55,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
             animationIndex={animationStartIndex + index}
             chromeProfiles={chromeProfiles}
             onCopyToClipboard={onCopyToClipboard}
+            onOpenWithProfile={onOpenWithProfile}
           />
         ))}
       </div>

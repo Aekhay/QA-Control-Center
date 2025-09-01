@@ -47,7 +47,7 @@ const ProfileManagerView: React.FC<ProfileManagerViewProps> = ({ profiles, onAdd
             </div>
             
             <p className="mb-6 text-gray-400 max-w-3xl">
-                Define your Chrome profiles here to quickly open links in a specific browser window. Due to browser security restrictions, this tool copies the link and reminds you to paste it into the correct profile.
+                This feature helps you open links in a specific Chrome profile. When you select a profile for a link, the app will copy its URL and show you a prompt with instructions. Because of browser security, this app cannot automatically switch profiles for you.
             </p>
 
             <div className="bg-gray-800 rounded-lg border border-gray-700">

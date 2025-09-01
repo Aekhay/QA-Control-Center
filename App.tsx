@@ -11,6 +11,7 @@ import Toast from './components/Toast';
 import QuickToolsView from './components/QuickToolsView';
 import CategorySection from './components/CategorySection';
 import ProfileManagerView from './components/ProfileManagerView';
+import OpenWithProfileModal from './components/OpenWithProfileModal';
 import * as api from './api';
 import { DEFAULT_API_ENVIRONMENTS } from './environments';
 
@@ -48,6 +49,7 @@ const App: React.FC = () => {
 
   // State for Chrome Profiles
   const [chromeProfiles, setChromeProfiles] = useState<ChromeProfile[]>([]);
+  const [openWithProfileInfo, setOpenWithProfileInfo] = useState<{ profileName: string; url: string } | null>(null);
   
   // State for Sidebar category re-ordering
   const [categoryOrder, setCategoryOrder] = useState<string[]>([]);
@@ -177,6 +179,15 @@ const App: React.FC = () => {
     }).catch(err => {
         console.error('Failed to copy: ', err);
         setToast({ message: "Failed to copy text.", type: 'warning' });
+    });
+  };
+
+  const handleOpenWithProfile = (url: string, profileName: string) => {
+    navigator.clipboard.writeText(url).then(() => {
+        setOpenWithProfileInfo({ url, profileName });
+    }).catch(err => {
+        console.error('Failed to copy for profile: ', err);
+        setToast({ message: "Failed to copy URL.", type: 'warning' });
     });
   };
 
@@ -380,6 +391,7 @@ const App: React.FC = () => {
                 animationStartIndex={animationCounter}
                 chromeProfiles={chromeProfiles}
                 onCopyToClipboard={handleCopyToClipboard}
+                onOpenWithProfile={handleOpenWithProfile}
               />
             );
             animationCounter += links.length;
@@ -469,6 +481,13 @@ const App: React.FC = () => {
       {isLinksView && editingLink && <EditLinkModal link={editingLink} categories={Object.keys(categorizedLinks)} onClose={() => setEditingLink(null)} onSave={handleUpdateLink}/>}
       {isLinksView && isConfirmBulkDeleteOpen && <ConfirmBulkDeleteModal linksToDelete={allLinks.filter(link => selectedLinkIds.includes(link.id))} onClose={() => setIsConfirmBulkDeleteOpen(false)} onConfirm={handleConfirmBulkDelete}/>}
       {isLinksView && isCommandPaletteOpen && <CommandPalette isOpen={isCommandPaletteOpen} onClose={() => setIsCommandPaletteOpen(false)} links={allLinks} onAddLink={() => { setIsCommandPaletteOpen(false); setIsAddModalOpen(true); }} onToggleDeleteMode={() => { setIsCommandPaletteOpen(false); toggleDeleteMode(); }} onSetViewMode={(mode) => { setIsCommandPaletteOpen(false); setViewMode(mode); }} />}
+      {openWithProfileInfo && (
+        <OpenWithProfileModal 
+          profileName={openWithProfileInfo.profileName}
+          url={openWithProfileInfo.url}
+          onClose={() => setOpenWithProfileInfo(null)}
+        />
+      )}
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );

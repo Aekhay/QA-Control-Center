@@ -12,6 +12,7 @@ interface LinkCardProps {
   animationIndex: number;
   chromeProfiles: ChromeProfile[];
   onCopyToClipboard: (text: string, message: string) => void;
+  onOpenWithProfile: (url: string, profileName: string) => void;
 }
 
 const HealthStatusIndicator: React.FC<{ status: HealthStatus }> = ({ status }) => {
@@ -26,7 +27,7 @@ const HealthStatusIndicator: React.FC<{ status: HealthStatus }> = ({ status }) =
 };
 
 
-const LinkCard: React.FC<LinkCardProps> = ({ link, viewMode, onEdit, isDeleteModeActive, isSelected, onSelect, animationIndex, chromeProfiles, onCopyToClipboard }) => {
+const LinkCard: React.FC<LinkCardProps> = ({ link, viewMode, onEdit, isDeleteModeActive, isSelected, onSelect, animationIndex, chromeProfiles, onCopyToClipboard, onOpenWithProfile }) => {
   const [isCopied, setIsCopied] = useState(false);
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
   const profileMenuRef = useRef<HTMLDivElement>(null);
@@ -70,7 +71,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, viewMode, onEdit, isDeleteMod
   };
   
   const handleProfileClick = (profile: ChromeProfile) => {
-    onCopyToClipboard(link.url, `URL copied! Switch to your "${profile.name}" profile and paste.`);
+    onOpenWithProfile(link.url, profile.name);
     setIsProfileMenuOpen(false);
   };
     
