@@ -77,23 +77,23 @@ const SkuSearchModal: React.FC<SkuSearchModalProps> = ({ onClose, apiEnvironment
     
     return (
         <div
-            className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center"
+            className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
             aria-modal="true"
             role="dialog"
         >
-            <div className="bg-gray-800 border border-gray-700 rounded-lg shadow-xl w-full max-w-4xl m-4 relative flex flex-col h-[90vh]">
-                <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-gray-700">
-                    <h2 className="text-lg font-semibold text-gray-200">SKU Search Results for "{skuToSearch}"</h2>
-                    <button onClick={onClose} className="p-1 rounded-full text-gray-400 hover:bg-gray-700" aria-label="Close modal">
+            <div className="bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-xl w-full max-w-4xl m-4 relative flex flex-col h-[90vh]">
+                <div className="flex-shrink-0 flex justify-between items-center p-4 border-b border-gray-200 dark:border-gray-700">
+                    <h2 className="text-lg font-semibold text-gray-900 dark:text-gray-100">SKU Search Results for "{skuToSearch}"</h2>
+                    <button onClick={onClose} className="p-1 rounded-full text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700" aria-label="Close modal">
                         <CloseIcon className="w-6 h-6" />
                     </button>
                 </div>
                 
-                <div className="flex-1 min-h-0 flex flex-col bg-gray-900 p-4">
-                    {isLoading && <p className="text-center text-gray-400 py-10">Fetching data...</p>}
+                <div className="flex-1 min-h-0 flex flex-col bg-gray-50 dark:bg-gray-900/50 p-4">
+                    {isLoading && <p className="text-center text-gray-500 dark:text-gray-400 py-10">Fetching data...</p>}
                     
                     {error && (
-                        <div className="m-auto p-4 text-center text-red-300 bg-red-900/50 border border-red-500/50 rounded-md">
+                        <div className="m-auto p-4 text-center text-red-700 dark:text-red-300 bg-red-100 dark:bg-red-900/40 border border-red-200 dark:border-red-500/50 rounded-md">
                             <h3 className="font-bold mb-2">An Error Occurred</h3>
                             <p className="text-sm font-mono break-all">{error}</p>
                         </div>

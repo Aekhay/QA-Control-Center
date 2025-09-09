@@ -112,8 +112,8 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-start justify-center pt-20" aria-modal="true" role="dialog">
-      <div className="fixed inset-0 bg-black/70 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative bg-gray-800 w-full max-w-xl rounded-lg shadow-2xl mx-4 border border-gray-700">
+      <div className="fixed inset-0 bg-black/50 backdrop-blur-sm" onClick={onClose} />
+      <div className="relative bg-white dark:bg-gray-800 w-full max-w-xl rounded-lg shadow-2xl mx-4 border border-gray-200 dark:border-gray-700">
         <div className="relative">
           <CommandIcon className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-500" />
           <input
@@ -125,10 +125,10 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
                 setSelectedIndex(0);
             }}
             placeholder="Search links or type a command..."
-            className="w-full pl-12 pr-4 py-4 bg-transparent text-gray-200 focus:outline-none text-lg"
+            className="w-full pl-12 pr-4 py-4 bg-transparent text-gray-900 dark:text-gray-200 focus:outline-none text-lg"
           />
         </div>
-        <hr className="border-gray-700" />
+        <hr className="border-gray-200 dark:border-gray-700" />
         <div ref={resultsRef} className="max-h-[50vh] overflow-y-auto p-2">
             {filteredCommands.length > 0 ? (
                 filteredCommands.map((command, index) => {
@@ -139,19 +139,19 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
                             key={isAction ? command.id : command.id}
                             onClick={() => handleItemClick(command)}
                             className={`flex items-center justify-between p-3 rounded-md cursor-pointer ${
-                                isSelected ? 'bg-sky-500/20' : 'hover:bg-gray-700'
+                                isSelected ? 'bg-sky-100 dark:bg-sky-900/50' : 'hover:bg-gray-100 dark:hover:bg-gray-700'
                             }`}
                         >
                             <div className="flex items-center gap-3 truncate">
-                                <div className="text-gray-400">
+                                <div className="text-gray-500">
                                     {isAction ? command.icon : <ExternalLinkIcon className="w-5 h-5"/>}
                                 </div>
                                 <div className="truncate">
-                                    <span className={`font-medium ${isSelected ? 'text-sky-300' : 'text-gray-300'}`}>
+                                    <span className={`font-medium ${isSelected ? 'text-sky-600 dark:text-sky-400' : 'text-gray-800 dark:text-gray-200'}`}>
                                         {command.name}
                                     </span>
                                     {!isAction && (
-                                        <span className="ml-2 text-sm text-gray-500">{command.category}</span>
+                                        <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">{command.category}</span>
                                     )}
                                 </div>
                             </div>

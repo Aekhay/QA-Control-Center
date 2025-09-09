@@ -33,9 +33,3 @@ export interface ApiEnvironment {
 export interface SiblingApiResponse {
   siblings?: string[];
 }
-
-export interface ChromeProfile {
-  id: string;
-  name: string;
-  directoryName: string;
-}

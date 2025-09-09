@@ -46,7 +46,7 @@ const Dropdown: React.FC<DropdownProps> = ({ options, selectedOption, onSelectOp
       <button
         type="button"
         onClick={() => setIsOpen(!isOpen)}
-        className="w-full flex justify-between items-center px-4 py-2 bg-sky-600 text-white font-semibold rounded-md text-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-800 focus:ring-sky-500"
+        className="w-full flex justify-between items-center px-4 py-2 bg-sky-600 text-white font-semibold rounded-md text-sm hover:bg-sky-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-white dark:focus:ring-offset-gray-800 focus:ring-sky-500"
         aria-haspopup="listbox"
         aria-expanded={isOpen}
       >
@@ -55,14 +55,14 @@ const Dropdown: React.FC<DropdownProps> = ({ options, selectedOption, onSelectOp
       </button>
 
       {isOpen && (
-        <div className="absolute z-10 mt-1 w-full bg-gray-700 rounded-md shadow-lg border border-gray-600 animate-fade-in">
+        <div className="absolute z-10 mt-1 w-full bg-white dark:bg-gray-800 rounded-md shadow-lg border border-gray-200 dark:border-gray-700 animate-fade-in">
           <div className="p-2">
             <input
               type="text"
               placeholder="Search or create..."
               value={searchTerm}
               onChange={handleInputChange}
-              className="w-full px-3 py-2 bg-gray-800 text-gray-200 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
+              className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded-md border border-gray-200 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-sky-500 text-sm"
               autoFocus
             />
           </div>
@@ -72,7 +72,7 @@ const Dropdown: React.FC<DropdownProps> = ({ options, selectedOption, onSelectOp
                 <li
                   key={option}
                   onClick={() => handleSelect(option)}
-                  className={`px-4 py-2 text-sm text-gray-300 cursor-pointer hover:bg-sky-500/20 hover:text-sky-300 ${selectedOption === option ? 'bg-sky-500/20' : ''}`}
+                  className={`px-4 py-2 text-sm text-gray-700 dark:text-gray-300 cursor-pointer hover:bg-sky-100 dark:hover:bg-sky-900/50 hover:text-sky-600 dark:hover:text-sky-400 ${selectedOption === option ? 'bg-sky-100 dark:bg-sky-900/50' : ''}`}
                   role="option"
                   aria-selected={selectedOption === option}
                 >
@@ -80,7 +80,7 @@ const Dropdown: React.FC<DropdownProps> = ({ options, selectedOption, onSelectOp
                 </li>
               ))
             ) : (
-                <li className="px-4 py-2 text-sm text-gray-500">No matching categories.</li>
+                <li className="px-4 py-2 text-sm text-gray-500 dark:text-gray-400">No matching categories.</li>
             )}
           </ul>
         </div>

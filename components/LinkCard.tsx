@@ -1,6 +1,6 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { LinkItem, HealthStatus, ChromeProfile } from '../types';
-import { ExternalLinkIcon, PencilIcon, CheckIcon, CopyIcon, BrowserProfileIcon } from '../constants';
+import { LinkItem, HealthStatus } from '../types';
+import { ExternalLinkIcon, PencilIcon, CheckIcon, CopyIcon } from '../constants';
 
 interface LinkCardProps {
   link: LinkItem;
@@ -10,16 +10,14 @@ interface LinkCardProps {
   isSelected: boolean;
   onSelect: (id: string) => void;
   animationIndex: number;
-  chromeProfiles: ChromeProfile[];
   onCopyToClipboard: (text: string, message: string) => void;
-  onOpenWithProfile: (url: string, profileName: string) => void;
 }
 
 const HealthStatusIndicator: React.FC<{ status: HealthStatus }> = ({ status }) => {
     const baseClasses = "w-2.5 h-2.5 rounded-full";
     const statusMap = {
         idle: "hidden",
-        checking: `${baseClasses} bg-slate-500 animate-pulse`,
+        checking: `${baseClasses} bg-gray-400 animate-pulse`,
         online: `${baseClasses} bg-green-500`,
         offline: `${baseClasses} bg-red-500`,
     };
@@ -27,29 +25,15 @@ const HealthStatusIndicator: React.FC<{ status: HealthStatus }> = ({ status }) =
 };
 
 
-const LinkCard: React.FC<LinkCardProps> = ({ link, viewMode, onEdit, isDeleteModeActive, isSelected, onSelect, animationIndex, chromeProfiles, onCopyToClipboard, onOpenWithProfile }) => {
+const LinkCard: React.FC<LinkCardProps> = ({ link, viewMode, onEdit, isDeleteModeActive, isSelected, onSelect, animationIndex, onCopyToClipboard }) => {
   const [isCopied, setIsCopied] = useState(false);
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
-  const profileMenuRef = useRef<HTMLDivElement>(null);
     
-  const gridBaseClasses = "group bg-gray-800 p-4 rounded-lg hover:bg-gray-700/60 hover:scale-[1.03] transition-all duration-300 flex items-center border border-gray-700 border-t-4 border-t-sky-500";
-  const listBaseClasses = "group bg-gray-800 px-4 py-2 rounded-md flex items-center border-b border-gray-700 hover:bg-gray-700/60";
+  const gridBaseClasses = "group bg-white dark:bg-gray-700 p-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 hover:scale-[1.03] transition-all duration-300 flex items-center border border-gray-200 dark:border-gray-600 border-t-4 border-t-sky-500";
+  const listBaseClasses = "group bg-white dark:bg-gray-700 px-4 py-2 rounded-md flex items-center border-b border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600";
 
   const baseClasses = viewMode === 'grid' ? gridBaseClasses : listBaseClasses;
     
   const cardClasses = `${baseClasses} ${isDeleteModeActive ? 'cursor-pointer' : ''} opacity-0`;
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
-        setIsProfileMenuOpen(false);
-      }
-    };
-    if (isProfileMenuOpen) {
-      document.addEventListener('mousedown', handleClickOutside);
-    }
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [isProfileMenuOpen]);
 
   const handleContainerClick = (e: React.MouseEvent<HTMLDivElement | HTMLAnchorElement>) => {
     if (isDeleteModeActive) {
@@ -69,11 +53,6 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, viewMode, onEdit, isDeleteMod
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
-  
-  const handleProfileClick = (profile: ChromeProfile) => {
-    onOpenWithProfile(link.url, profile.name);
-    setIsProfileMenuOpen(false);
-  };
     
   const cardContent = (
     <>
@@ -83,7 +62,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, viewMode, onEdit, isDeleteMod
             className={`w-6 h-6 rounded-md flex items-center justify-center transition-colors ${
               isSelected
                 ? 'bg-sky-500'
-                : 'bg-gray-700 border border-gray-600'
+                : 'bg-gray-200 dark:bg-gray-600 border border-gray-300 dark:border-gray-500'
             }`}
           >
             {isSelected && <CheckIcon className="w-4 h-4 text-white" />}
@@ -94,56 +73,28 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, viewMode, onEdit, isDeleteMod
       <div className="flex-1 flex flex-col truncate mr-2">
         <div className="flex items-center gap-2">
             {link.healthStatus && <HealthStatusIndicator status={link.healthStatus} />}
-            <span className="font-medium text-gray-200 truncate">{link.name}</span>
+            <span className="font-medium text-gray-900 dark:text-gray-100 truncate">{link.name}</span>
         </div>
         {viewMode === 'list' && (
-             <span className="text-sm text-gray-400 truncate">{link.url}</span>
+             <span className="text-sm text-gray-500 dark:text-gray-400 truncate">{link.url}</span>
         )}
       </div>
       <div className="flex items-center flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
-        {chromeProfiles.length > 0 && (
-            <div className="relative">
-                <button
-                    onClick={(e) => handleActionClick(e, () => setIsProfileMenuOpen(p => !p))}
-                    className="p-2 text-gray-500 rounded-full hover:bg-gray-900 hover:text-sky-400 transition-colors"
-                    aria-label={`Open with profile for ${link.name}`}
-                >
-                    <BrowserProfileIcon className="w-4 h-4" />
-                </button>
-                {isProfileMenuOpen && (
-                    <div ref={profileMenuRef} className="absolute bottom-full right-0 mb-2 w-48 bg-gray-900 border border-gray-700 rounded-md shadow-lg z-20 animate-fade-in py-1">
-                        <div className="px-3 py-2 text-xs font-semibold text-gray-400 border-b border-gray-700">Open with Profile</div>
-                        <ul>
-                            {chromeProfiles.map(profile => (
-                                <li key={profile.id}>
-                                    <button 
-                                        onClick={(e) => handleActionClick(e, () => handleProfileClick(profile))}
-                                        className="w-full text-left px-3 py-2 text-sm text-gray-300 hover:bg-sky-500/20"
-                                    >
-                                        {profile.name}
-                                    </button>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                )}
-            </div>
-        )}
         <button
             onClick={(e) => handleActionClick(e, () => onEdit(link))}
-            className="p-2 text-gray-500 rounded-full hover:bg-gray-900 hover:text-sky-400 transition-colors"
+            className="p-2 text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-sky-400 transition-colors"
             aria-label={`Edit ${link.name}`}
         >
             <PencilIcon className="w-4 h-4" />
         </button>
         <button
             onClick={(e) => handleActionClick(e, handleCopyUrl)}
-            className="p-2 text-gray-500 rounded-full hover:bg-gray-900 hover:text-sky-400 transition-colors"
+            className="p-2 text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-sky-400 transition-colors"
             aria-label={`Copy link for ${link.name}`}
         >
             {isCopied ? <CheckIcon className="w-4 h-4 text-green-500" /> : <CopyIcon className="w-4 h-4" />}
         </button>
-        <ExternalLinkIcon className="w-5 h-5 text-gray-500 group-hover:text-sky-400 transition-colors ml-1" />
+        <ExternalLinkIcon className="w-5 h-5 text-gray-400 group-hover:text-sky-400 transition-colors ml-1" />
       </div>
     </>
   );

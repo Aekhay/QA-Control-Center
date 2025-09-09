@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useMemo, useCallback } from 'react';
-import { LinkItem, CategorizedLinks, TestDataSet, HealthStatus, ApiEnvironment, ChromeProfile } from './types';
+import { LinkItem, CategorizedLinks, TestDataSet, HealthStatus, ApiEnvironment } from './types';
 import Header from './components/Header';
 import Sidebar from './components/Sidebar';
 import EditLinkModal from './components/EditLinkModal';
@@ -10,13 +10,12 @@ import TestDataView from './components/TestDataView';
 import Toast from './components/Toast';
 import QuickToolsView from './components/QuickToolsView';
 import CategorySection from './components/CategorySection';
-import ProfileManagerView from './components/ProfileManagerView';
-import OpenWithProfileModal from './components/OpenWithProfileModal';
 import * as api from './api';
 import { DEFAULT_API_ENVIRONMENTS } from './environments';
 
 const App: React.FC = () => {
   type ViewMode = 'grid' | 'list';
+  type Theme = 'light' | 'dark';
 
   const [viewMode, setViewMode] = useState<ViewMode>('list');
   const [searchTerm, setSearchTerm] = useState('');
@@ -47,14 +46,29 @@ const App: React.FC = () => {
   // API environments are now read from a static file
   const [apiEnvironments] = useState<ApiEnvironment[]>(DEFAULT_API_ENVIRONMENTS);
 
-  // State for Chrome Profiles
-  const [chromeProfiles, setChromeProfiles] = useState<ChromeProfile[]>([]);
-  const [openWithProfileInfo, setOpenWithProfileInfo] = useState<{ profileName: string; url: string } | null>(null);
-  
   // State for Sidebar category re-ordering
   const [categoryOrder, setCategoryOrder] = useState<string[]>([]);
 
-  const isLinksView = !['Test Data', 'Quick Tools', 'Chrome Profiles'].includes(selectedCategory);
+  const [theme, setTheme] = useState<Theme>(() => {
+    const savedTheme = localStorage.getItem('theme') as Theme | null;
+    const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    return savedTheme || (userPrefersDark ? 'dark' : 'light');
+  });
+
+  useEffect(() => {
+    if (theme === 'dark') {
+        document.documentElement.classList.add('dark');
+    } else {
+        document.documentElement.classList.remove('dark');
+    }
+    localStorage.setItem('theme', theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
+  };
+
+  const isLinksView = !['Test Data', 'Quick Tools'].includes(selectedCategory);
 
   // --- Data Fetching ---
   const fetchLinks = useCallback(async () => {
@@ -118,10 +132,6 @@ const App: React.FC = () => {
         setActiveDataSetId(testData[0].id);
       }
       
-      // Load chrome profiles from localStorage
-      const storedProfiles = localStorage.getItem('chromeProfiles');
-      setChromeProfiles(storedProfiles ? JSON.parse(storedProfiles) : []);
-
       // Load category order from localStorage
       const storedCategoryOrder = localStorage.getItem('categoryOrder');
       if (storedCategoryOrder) {
@@ -140,11 +150,6 @@ const App: React.FC = () => {
       localStorage.setItem('categoryOrder', JSON.stringify(categoryOrder));
     }
   }, [categoryOrder]);
-  
-  // Persist chrome profiles to localStorage
-  useEffect(() => {
-    localStorage.setItem('chromeProfiles', JSON.stringify(chromeProfiles));
-  }, [chromeProfiles]);
   
   // Initial Health Check
   useEffect(() => {
@@ -179,15 +184,6 @@ const App: React.FC = () => {
     }).catch(err => {
         console.error('Failed to copy: ', err);
         setToast({ message: "Failed to copy text.", type: 'warning' });
-    });
-  };
-
-  const handleOpenWithProfile = (url: string, profileName: string) => {
-    navigator.clipboard.writeText(url).then(() => {
-        setOpenWithProfileInfo({ url, profileName });
-    }).catch(err => {
-        console.error('Failed to copy for profile: ', err);
-        setToast({ message: "Failed to copy URL.", type: 'warning' });
     });
   };
 
@@ -250,25 +246,6 @@ const App: React.FC = () => {
     }
     setToast({ message: "Test data set deleted.", type: 'success' });
   };
-  
-  // Chrome Profile Handlers
-  const handleAddProfile = (newProfileData: Omit<ChromeProfile, 'id'>) => {
-    const profileWithId = { ...newProfileData, id: Date.now().toString() };
-    setChromeProfiles(prev => [...prev, profileWithId]);
-    setToast({ message: `Profile "${profileWithId.name}" added.`, type: 'success' });
-  };
-  
-  const handleUpdateProfile = (updatedProfile: ChromeProfile) => {
-    setChromeProfiles(prev => prev.map(p => p.id === updatedProfile.id ? updatedProfile : p));
-    setToast({ message: `Profile "${updatedProfile.name}" updated.`, type: 'success' });
-  };
-  
-  const handleDeleteProfile = (id: string) => {
-    if (window.confirm("Are you sure you want to delete this profile? This cannot be undone.")) {
-        setChromeProfiles(prev => prev.filter(p => p.id !== id));
-        setToast({ message: "Profile deleted.", type: 'success' });
-    }
-  };
 
   // Reorder handler
   const handleReorderCategories = (startIndex: number, endIndex: number) => {
@@ -311,7 +288,7 @@ const App: React.FC = () => {
 
   const sidebarCategories = useMemo(() => {
     const dynamicCategories = Object.keys(categorizedLinks);
-    const allCurrentCats = ['All', ...dynamicCategories, 'Test Data', 'Quick Tools', 'Chrome Profiles'];
+    const allCurrentCats = ['All', ...dynamicCategories, 'Test Data', 'Quick Tools'];
   
     // If no custom order is set, use a default sort
     if (categoryOrder.length === 0) {
@@ -379,7 +356,7 @@ const App: React.FC = () => {
   const renderMainContent = () => {
     if (isLinksView) {
       return loading ? (
-        <div className="text-center py-16"><h2 className="text-2xl font-semibold text-gray-400">Loading links...</h2></div>
+        <div className="text-center py-16"><h2 className="text-2xl font-semibold text-gray-500 dark:text-gray-400">Loading links...</h2></div>
       ) : hasResults ? (
          Object.entries(filteredLinks).map(([category, links]) => {
             const section = (
@@ -389,9 +366,7 @@ const App: React.FC = () => {
                 selectedLinkIds={selectedLinkIds} onSelect={handleSelectLink}
                 showCategoryTitle={selectedCategory === 'All'}
                 animationStartIndex={animationCounter}
-                chromeProfiles={chromeProfiles}
                 onCopyToClipboard={handleCopyToClipboard}
-                onOpenWithProfile={handleOpenWithProfile}
               />
             );
             animationCounter += links.length;
@@ -399,8 +374,8 @@ const App: React.FC = () => {
          })
       ) : (
         <div className="text-center py-16">
-          <h2 className="text-2xl font-semibold text-gray-400">No results found</h2>
-          <p className="mt-2 text-gray-500">Try adjusting your search or filter.</p>
+          <h2 className="text-2xl font-semibold text-gray-500 dark:text-gray-400">No results found</h2>
+          <p className="mt-2 text-gray-600 dark:text-gray-500">Try adjusting your search or filter.</p>
         </div>
       );
     }
@@ -424,24 +399,13 @@ const App: React.FC = () => {
             />
         );
     }
-
-    if (selectedCategory === 'Chrome Profiles') {
-      return (
-          <ProfileManagerView
-              profiles={chromeProfiles}
-              onAdd={handleAddProfile}
-              onUpdate={handleUpdateProfile}
-              onDelete={handleDeleteProfile}
-          />
-      );
-    }
     
     return null;
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 font-sans text-gray-200 flex justify-center p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-screen-xl flex bg-gray-800 rounded-xl shadow-2xl shadow-black/30 overflow-hidden">
+    <div className="min-h-screen bg-gray-100 dark:bg-gray-900 font-sans text-gray-800 dark:text-gray-200 flex justify-center p-4 sm:p-6 lg:p-8">
+      <div className="w-full max-w-screen-xl flex bg-white dark:bg-gray-800 rounded-xl shadow-2xl shadow-gray-200/50 dark:shadow-black/20 overflow-hidden">
         <Sidebar
           categories={sidebarCategories}
           selectedCategory={selectedCategory}
@@ -450,13 +414,14 @@ const App: React.FC = () => {
           setSearchTerm={setSearchTerm}
           onReorder={handleReorderCategories}
         />
-        <div className="flex-1 flex flex-col overflow-hidden relative bg-gray-900">
+        <div className="flex-1 flex flex-col overflow-hidden relative bg-gray-50 dark:bg-gray-900/50">
           {isLinksView && (
               <Header
                   viewMode={viewMode} setViewMode={setViewMode}
                   onAddClick={() => setIsAddModalOpen(true)}
                   isDeleteModeActive={isDeleteModeActive} toggleDeleteMode={toggleDeleteMode}
                   onRefresh={runHealthChecks} isRefreshing={isRefreshing}
+                  theme={theme} toggleTheme={toggleTheme}
               />
           )}
           <main key={selectedCategory} className={`flex-1 overflow-y-auto animate-fade-in px-4 sm:px-6 lg:px-8 py-8 ${showDeleteBar ? 'pb-24' : ''}`}>
@@ -464,11 +429,11 @@ const App: React.FC = () => {
           </main>
           
           {isLinksView && showDeleteBar && (
-            <div className="absolute bottom-0 left-0 right-0 bg-gray-800/80 backdrop-blur-sm z-20 border-t border-gray-700">
+            <div className="absolute bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm z-20 border-t border-gray-200 dark:border-gray-700">
                 <div className="px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
-                    <span className="font-medium text-gray-300">{selectedLinkIds.length} item(s) selected</span>
+                    <span className="font-medium text-gray-700 dark:text-gray-300">{selectedLinkIds.length} item(s) selected</span>
                     <div className="flex items-center gap-4">
-                        <button onClick={() => setSelectedLinkIds([])} className="px-4 py-2 rounded-md text-sm font-medium bg-gray-600 text-gray-100 hover:bg-gray-500 transition-colors">Cancel</button>
+                        <button onClick={() => setSelectedLinkIds([])} className="px-4 py-2 rounded-md text-sm font-medium bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 transition-colors">Cancel</button>
                         <button onClick={() => setIsConfirmBulkDeleteOpen(true)} className="px-4 py-2 rounded-md text-sm font-medium bg-red-600 text-white hover:bg-red-700 transition-colors">Delete Selected</button>
                     </div>
                 </div>
@@ -481,13 +446,6 @@ const App: React.FC = () => {
       {isLinksView && editingLink && <EditLinkModal link={editingLink} categories={Object.keys(categorizedLinks)} onClose={() => setEditingLink(null)} onSave={handleUpdateLink}/>}
       {isLinksView && isConfirmBulkDeleteOpen && <ConfirmBulkDeleteModal linksToDelete={allLinks.filter(link => selectedLinkIds.includes(link.id))} onClose={() => setIsConfirmBulkDeleteOpen(false)} onConfirm={handleConfirmBulkDelete}/>}
       {isLinksView && isCommandPaletteOpen && <CommandPalette isOpen={isCommandPaletteOpen} onClose={() => setIsCommandPaletteOpen(false)} links={allLinks} onAddLink={() => { setIsCommandPaletteOpen(false); setIsAddModalOpen(true); }} onToggleDeleteMode={() => { setIsCommandPaletteOpen(false); toggleDeleteMode(); }} onSetViewMode={(mode) => { setIsCommandPaletteOpen(false); setViewMode(mode); }} />}
-      {openWithProfileInfo && (
-        <OpenWithProfileModal 
-          profileName={openWithProfileInfo.profileName}
-          url={openWithProfileInfo.url}
-          onClose={() => setOpenWithProfileInfo(null)}
-        />
-      )}
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );

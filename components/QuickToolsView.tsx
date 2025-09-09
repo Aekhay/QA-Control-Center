@@ -47,10 +47,10 @@ const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments }) => {
 
     return (
         <div>
-            <h2 className="text-2xl font-bold text-gray-200 tracking-tight mb-6">Quick Tools</h2>
+            <h2 className="text-2xl font-bold text-gray-900 dark:text-gray-100 tracking-tight mb-6">Quick Tools</h2>
             
             <section className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-200 mb-4">Sibling SKU Checker</h3>
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">Sibling SKU Checker</h3>
                 <form onSubmit={handleCheckSiblingsSubmit} className="flex items-stretch w-full max-w-lg">
                     <div className="relative flex-grow">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -61,7 +61,7 @@ const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments }) => {
                             value={siblingSku}
                             onChange={(e) => setSiblingSku(e.target.value)}
                             placeholder="Enter main SKU..."
-                            className="block w-full rounded-l-md border border-gray-600 bg-gray-900 text-gray-200 py-2 pl-9 pr-3 text-sm placeholder:text-gray-400 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                            className="block w-full rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 py-2 pl-9 pr-3 text-sm placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
                             required
                             disabled={apiEnvironments.length === 0}
                         />
@@ -69,7 +69,7 @@ const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments }) => {
                     <select
                         value={selectedEnvId}
                         onChange={(e) => setSelectedEnvId(e.target.value)}
-                        className="-ml-px block border border-gray-600 bg-gray-800 py-2 pl-3 pr-7 text-sm text-gray-200 focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                        className="-ml-px block border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 py-2 pl-3 pr-7 text-sm text-gray-900 dark:text-gray-200 focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
                         disabled={apiEnvironments.length === 0}
                     >
                         {apiEnvironments.length === 0 ? (
@@ -91,7 +91,7 @@ const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments }) => {
             </section>
 
             <section className="mb-8">
-                <h3 className="text-lg font-semibold text-gray-200 mb-4">SKU Search</h3>
+                <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">SKU Search</h3>
                 <form onSubmit={handleSkuSearchSubmit} className="flex items-stretch w-full max-w-lg">
                     <div className="relative flex-grow">
                         <div className="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-3">
@@ -102,7 +102,7 @@ const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments }) => {
                             value={searchSku}
                             onChange={(e) => setSearchSku(e.target.value)}
                             placeholder="Enter SKU..."
-                            className="block w-full rounded-l-md border border-gray-600 bg-gray-900 text-gray-200 py-2 pl-9 pr-3 text-sm placeholder:text-gray-400 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                            className="block w-full rounded-l-md border border-gray-300 dark:border-gray-600 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-200 py-2 pl-9 pr-3 text-sm placeholder:text-gray-500 dark:placeholder:text-gray-400 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
                             required
                             disabled={apiEnvironments.length === 0}
                         />
@@ -110,7 +110,7 @@ const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments }) => {
                     <select
                         value={selectedEnvId}
                         onChange={(e) => setSelectedEnvId(e.target.value)}
-                        className="-ml-px block border border-gray-600 bg-gray-800 py-2 pl-3 pr-7 text-sm text-gray-200 focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
+                        className="-ml-px block border border-gray-300 dark:border-gray-600 bg-gray-100 dark:bg-gray-800 py-2 pl-3 pr-7 text-sm text-gray-900 dark:text-gray-200 focus:z-10 focus:border-sky-500 focus:outline-none focus:ring-1 focus:ring-sky-500"
                         disabled={apiEnvironments.length === 0}
                     >
                         {apiEnvironments.length === 0 ? (
@@ -133,32 +133,32 @@ const QuickToolsView: React.FC<QuickToolsViewProps> = ({ apiEnvironments }) => {
 
             <section>
                 <div className="flex justify-between items-center mb-4">
-                    <h3 className="text-lg font-semibold text-gray-200">API Environments</h3>
+                    <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">API Environments</h3>
                 </div>
-                <div className="bg-gray-800 rounded-lg border border-gray-700">
+                <div className="bg-white dark:bg-gray-700 rounded-lg border border-gray-200 dark:border-gray-600">
                     {apiEnvironments.length > 0 ? (
-                        <ul className="divide-y divide-gray-700">
+                        <ul className="divide-y divide-gray-200 dark:divide-gray-600">
                             {apiEnvironments.map(env => (
                                 <li key={env.id} className="p-4">
                                     <div className="flex justify-between items-center">
-                                        <p className="font-medium text-gray-200">{env.name}</p>
+                                        <p className="font-medium text-gray-900 dark:text-gray-100">{env.name}</p>
                                         <button
                                             onClick={() => setViewingEnvId(viewingEnvId === env.id ? null : env.id)}
-                                            className="px-3 py-1 rounded-md text-sm font-medium bg-gray-700 text-gray-300 hover:bg-gray-600 transition-colors"
+                                            className="px-3 py-1 rounded-md text-sm font-medium bg-gray-200 text-gray-700 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 transition-colors"
                                         >
                                             {viewingEnvId === env.id ? 'Hide' : 'View'}
                                         </button>
                                     </div>
                                     {viewingEnvId === env.id && (
-                                        <div className="mt-3 bg-gray-900 p-3 rounded-md border border-gray-700 animate-fade-in">
-                                            <p className="text-sm text-gray-400 break-all">{env.url}</p>
+                                        <div className="mt-3 bg-gray-100 dark:bg-gray-800 p-3 rounded-md border border-gray-200 dark:border-gray-600 animate-fade-in">
+                                            <p className="text-sm text-gray-500 dark:text-gray-400 break-all">{env.url}</p>
                                         </div>
                                     )}
                                 </li>
                             ))}
                         </ul>
                     ) : (
-                        <p className="p-6 text-center text-gray-500">No API environments configured.</p>
+                        <p className="p-6 text-center text-gray-500 dark:text-gray-400">No API environments configured.</p>
                     )}
                 </div>
             </section>

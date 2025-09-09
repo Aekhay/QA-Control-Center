@@ -34,16 +34,16 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({ link, onClose, onSave, ca
 
   return (
     <div
-      className="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 flex items-center justify-center"
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center"
       aria-modal="true"
       role="dialog"
     >
-      <div className="bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md m-4 relative border border-gray-700">
+      <div className="bg-white dark:bg-gray-800 rounded-lg shadow-xl p-6 w-full max-w-md m-4 relative border border-gray-200 dark:border-gray-700">
         <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-100">Edit Link</h2>
+          <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100">Edit Link</h2>
           <button
             onClick={onClose}
-            className="p-1 rounded-full text-gray-400 hover:bg-gray-700"
+            className="p-1 rounded-full text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-700"
             aria-label="Close modal"
           >
             <CloseIcon className="w-6 h-6" />
@@ -51,7 +51,7 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({ link, onClose, onSave, ca
         </div>
         <form onSubmit={handleSubmit}>
           <div className="mb-4">
-            <label htmlFor="link-name" className="block text-sm font-medium text-gray-400 mb-1">
+            <label htmlFor="link-name" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
               Name
             </label>
             <input
@@ -59,12 +59,12 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({ link, onClose, onSave, ca
               id="link-name"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-900 text-gray-200 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded-md border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-sky-500"
               required
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="link-url" className="block text-sm font-medium text-gray-400 mb-1">
+            <label htmlFor="link-url" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
               URL
             </label>
             <input
@@ -72,12 +72,12 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({ link, onClose, onSave, ca
               id="link-url"
               value={url}
               onChange={(e) => setUrl(e.target.value)}
-              className="w-full px-3 py-2 bg-gray-900 text-gray-200 rounded-md border border-gray-600 focus:outline-none focus:ring-2 focus:ring-sky-500"
+              className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded-md border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-sky-500"
               required
             />
           </div>
           <div className="mb-6">
-            <label htmlFor="link-category" className="block text-sm font-medium text-gray-400 mb-1">
+            <label htmlFor="link-category" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
               Category
             </label>
             <Dropdown
@@ -91,7 +91,7 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({ link, onClose, onSave, ca
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-md text-sm font-medium bg-gray-700 text-gray-200 hover:bg-gray-600 transition-colors"
+              className="px-4 py-2 rounded-md text-sm font-medium bg-gray-200 text-gray-800 hover:bg-gray-300 dark:bg-gray-600 dark:text-gray-200 dark:hover:bg-gray-500 transition-colors"
             >
               Cancel
             </button>

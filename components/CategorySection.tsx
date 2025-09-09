@@ -1,5 +1,5 @@
 import React from 'react';
-import { LinkItem, ChromeProfile } from '../types';
+import { LinkItem } from '../types';
 import LinkCard from './LinkCard';
 
 interface CategorySectionProps {
@@ -12,9 +12,7 @@ interface CategorySectionProps {
   onSelect: (id: string) => void;
   showCategoryTitle: boolean;
   animationStartIndex: number;
-  chromeProfiles: ChromeProfile[];
   onCopyToClipboard: (text: string, message: string) => void;
-  onOpenWithProfile: (url: string, profileName: string) => void;
 }
 
 const CategorySection: React.FC<CategorySectionProps> = ({
@@ -27,9 +25,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   onSelect,
   showCategoryTitle,
   animationStartIndex,
-  chromeProfiles,
   onCopyToClipboard,
-  onOpenWithProfile,
 }) => {
   const viewWrapperClasses = viewMode === 'grid'
     ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
@@ -38,7 +34,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   return (
     <section className="mb-8">
       {showCategoryTitle && (
-        <h2 className="text-xl font-semibold text-gray-200 mb-4 pb-2 border-b-2 border-sky-500/30">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-4 pb-2 border-b-2 border-sky-500/30 dark:border-sky-500/40">
           {category}
         </h2>
       )}
@@ -53,9 +49,7 @@ const CategorySection: React.FC<CategorySectionProps> = ({
             isSelected={selectedLinkIds.includes(link.id)}
             onSelect={onSelect}
             animationIndex={animationStartIndex + index}
-            chromeProfiles={chromeProfiles}
             onCopyToClipboard={onCopyToClipboard}
-            onOpenWithProfile={onOpenWithProfile}
           />
         ))}
       </div>
