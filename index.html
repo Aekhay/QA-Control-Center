@@ -19,6 +19,21 @@
           fontFamily: {
             sans: ['Inter', 'sans-serif'],
           },
+          colors: {
+            'dark-bg': '#000000', // Pure black background for the page
+            gray: {
+              50: '#fafafa',
+              100: '#f4f4f5',
+              200: '#e4e4e7',
+              300: '#d4d4d8',
+              400: '#a1a1aa',
+              500: '#71717a',
+              600: '#52525b',
+              700: '#3f3f46', // Neutral dark gray
+              800: '#18181b', // Very dark gray for surfaces
+              900: '#09090b', // Near black for content backgrounds
+            }
+          }
         },
       },
     }
@@ -67,7 +82,7 @@
 </script>
 </head>
 
-<body class="bg-gray-100 dark:bg-gray-900">
+<body class="bg-gray-100 dark:bg-dark-bg">
   <div id="root"></div>
   <script type="module" src="/index.tsx"></script>
 </body>
