@@ -30,11 +30,10 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, viewMode, onEdit, isDeleteMod
     
   const gridBaseClasses = "group bg-white dark:bg-gray-700 p-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 hover:scale-[1.03] transition-all duration-300 flex items-center border border-gray-200 dark:border-gray-600 border-t-4 border-t-sky-500";
   const listBaseClasses = "group bg-white dark:bg-gray-700 px-4 py-2 rounded-md flex items-center border-b border-gray-200 dark:border-gray-600 hover:bg-gray-100 dark:hover:bg-gray-600";
-  const textTypeClasses = link.type === 'text' ? 'cursor-copy' : '';
 
   const baseClasses = viewMode === 'grid' ? gridBaseClasses : listBaseClasses;
     
-  const cardClasses = `${baseClasses} ${isDeleteModeActive ? 'cursor-pointer' : ''} ${textTypeClasses} opacity-0`;
+  const cardClasses = `${baseClasses} ${isDeleteModeActive ? 'cursor-pointer' : ''} opacity-0`;
 
   const handleContainerClick = (e: React.MouseEvent<HTMLDivElement | HTMLAnchorElement>) => {
     if (isDeleteModeActive) {
@@ -49,8 +48,8 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, viewMode, onEdit, isDeleteMod
     action();
   };
   
-  const handleCopyContent = () => {
-    onCopyToClipboard(link.content, `Content for "${link.name}" copied.`);
+  const handleCopyUrl = () => {
+    onCopyToClipboard(link.url, `URL for "${link.name}" copied.`);
     setIsCopied(true);
     setTimeout(() => setIsCopied(false), 2000);
   };
@@ -77,7 +76,7 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, viewMode, onEdit, isDeleteMod
             <span className="font-medium text-gray-900 dark:text-gray-100 truncate">{link.name}</span>
         </div>
         {viewMode === 'list' && (
-             <span className="text-sm text-gray-500 dark:text-gray-400 truncate">{link.content}</span>
+             <span className="text-sm text-gray-500 dark:text-gray-400 truncate">{link.url}</span>
         )}
       </div>
       <div className="flex items-center flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
@@ -89,53 +88,33 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, viewMode, onEdit, isDeleteMod
             <PencilIcon className="w-4 h-4" />
         </button>
         <button
-            onClick={(e) => handleActionClick(e, handleCopyContent)}
+            onClick={(e) => handleActionClick(e, handleCopyUrl)}
             className="p-2 text-gray-400 rounded-full hover:bg-gray-200 dark:hover:bg-gray-800 hover:text-sky-400 transition-colors"
             aria-label={`Copy link for ${link.name}`}
         >
             {isCopied ? <CheckIcon className="w-4 h-4 text-green-500" /> : <CopyIcon className="w-4 h-4" />}
         </button>
-        {link.type === 'url' && <ExternalLinkIcon className="w-5 h-5 text-gray-400 group-hover:text-sky-400 transition-colors ml-1" />}
+        <ExternalLinkIcon className="w-5 h-5 text-gray-400 group-hover:text-sky-400 transition-colors ml-1" />
       </div>
     </>
   );
 
   const animationStyle = { animation: `fade-in 0.5s ease-out ${animationIndex * 0.05}s forwards` };
 
-  if (isDeleteModeActive) {
-    return (
-      <div onClick={handleContainerClick} className={cardClasses} style={animationStyle}>
-        {cardContent}
-      </div>
-    );
-  }
-
-  if (link.type === 'url') {
-    return (
-      <a
-        href={link.content}
-        target="_blank"
-        rel="noopener noreferrer"
-        className={cardClasses}
-        style={animationStyle}
-      >
-        {cardContent}
-      </a>
-    );
-  }
-
-  // It's a text-based item, so render a div that copies content on click
-  return (
-    <div
-      onClick={handleCopyContent}
-      className={cardClasses}
-      style={animationStyle}
-      role="button"
-      tabIndex={0}
-      aria-label={`Copy content for ${link.name}`}
-    >
+  return isDeleteModeActive ? (
+    <div onClick={handleContainerClick} className={cardClasses} style={animationStyle}>
       {cardContent}
     </div>
+  ) : (
+    <a
+      href={link.url}
+      target="_blank"
+      rel="noopener noreferrer"
+      className={cardClasses}
+      style={animationStyle}
+    >
+      {cardContent}
+    </a>
   );
 };
 

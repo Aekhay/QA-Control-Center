@@ -19,7 +19,7 @@ type CommandAction = {
     category: 'Actions';
 };
 
-type CommandLink = LinkItem;
+type CommandLink = LinkItem & { category: string };
 
 type Command = CommandAction | CommandLink;
 
@@ -52,7 +52,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
 
     const filteredLinks = links.filter(link =>
       link.name.toLowerCase().includes(lowercasedQuery) ||
-      link.content.toLowerCase().includes(lowercasedQuery) ||
+      link.url.toLowerCase().includes(lowercasedQuery) ||
       link.category.toLowerCase().includes(lowercasedQuery)
     );
 
@@ -87,7 +87,8 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
         e.preventDefault();
         const command = filteredCommands[selectedIndex];
         if (command) {
-          handleItemClick(command);
+            'perform' in command ? command.perform() : window.open(command.url, '_blank');
+            onClose();
         }
       }
     };
@@ -103,11 +104,7 @@ const CommandPalette: React.FC<CommandPaletteProps> = ({
   }, [selectedIndex]);
 
   const handleItemClick = (command: Command) => {
-    if ('perform' in command) {
-        command.perform();
-    } else if (command.type === 'url') {
-        window.open(command.content, '_blank');
-    }
+    'perform' in command ? command.perform() : window.open(command.url, '_blank');
     onClose();
   };
 

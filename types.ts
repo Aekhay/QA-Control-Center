@@ -4,8 +4,7 @@ export interface LinkItem {
   id: string;
   category: string;
   name: string;
-  content: string;
-  type: 'url' | 'text';
+  url: string;
   healthStatus?: HealthStatus;
 }
 
