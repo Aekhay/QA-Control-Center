@@ -10,10 +10,25 @@ interface EditLinkModalProps {
   categories: string[];
 }
 
+const ContentTypeToggle: React.FC<{ type: 'url' | 'text', setType: (type: 'url' | 'text') => void }> = ({ type, setType }) => {
+    const baseClasses = "px-4 py-1.5 text-sm font-medium transition-colors rounded-md flex-1";
+    const activeClasses = "bg-sky-600 text-white shadow-sm";
+    const inactiveClasses = "bg-gray-200 dark:bg-gray-700 text-gray-700 dark:text-gray-300 hover:bg-gray-300 dark:hover:bg-gray-600";
+  
+    return (
+      <div className="flex items-center gap-1 p-1 bg-gray-100 dark:bg-gray-900 rounded-lg">
+        <button type="button" onClick={() => setType('url')} className={`${baseClasses} ${type === 'url' ? activeClasses : inactiveClasses}`}>URL</button>
+        <button type="button" onClick={() => setType('text')} className={`${baseClasses} ${type === 'text' ? activeClasses : inactiveClasses}`}>Text</button>
+      </div>
+    );
+};
+
 const EditLinkModal: React.FC<EditLinkModalProps> = ({ link, onClose, onSave, categories }) => {
   const [name, setName] = useState(link.name);
-  const [url, setUrl] = useState(link.url);
+  const [content, setContent] = useState(link.content);
   const [category, setCategory] = useState(link.category);
+  const [type, setType] = useState(link.type);
+  const [error, setError] = useState('');
 
   useEffect(() => {
     const handleEsc = (event: KeyboardEvent) => {
@@ -29,7 +44,19 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({ link, onClose, onSave, ca
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    onSave({ ...link, name, url, category });
+    setError('');
+    if (!name.trim() || !content.trim() || !category.trim()) return;
+
+    if (type === 'url') {
+      try {
+        new URL(content);
+      } catch (_) {
+        setError('Please enter a valid URL, including https://');
+        return;
+      }
+    }
+
+    onSave({ ...link, name, content, category, type });
   };
 
   return (
@@ -64,17 +91,24 @@ const EditLinkModal: React.FC<EditLinkModalProps> = ({ link, onClose, onSave, ca
             />
           </div>
           <div className="mb-4">
-            <label htmlFor="link-url" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
-              URL
+            <label htmlFor="link-content" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">
+              Content
             </label>
+            <div className="flex items-center gap-2 mb-2">
+                <ContentTypeToggle type={type} setType={setType} />
+            </div>
             <input
-              type="url"
-              id="link-url"
-              value={url}
-              onChange={(e) => setUrl(e.target.value)}
+              type={type === 'url' ? 'url' : 'text'}
+              id="link-content"
+              value={content}
+              onChange={(e) => {
+                setContent(e.target.value);
+                setError('');
+              }}
               className="w-full px-3 py-2 bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-200 rounded-md border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-sky-500"
               required
             />
+             {error && <p className="text-red-500 text-sm mt-1">{error}</p>}
           </div>
           <div className="mb-6">
             <label htmlFor="link-category" className="block text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">

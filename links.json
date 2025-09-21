@@ -3,91 +3,109 @@
   {
     "category": "Sites",
     "name": "Beta 1",
-    "url": "https://beta1.myapp.com"
+    "content": "https://beta1.myapp.com",
+    "type": "url"
   },
   {
     "category": "Sites",
     "name": "Beta 2",
-    "url": "https://beta2.myapp.com"
+    "content": "https://beta2.myapp.com",
+    "type": "url"
   },
   {
     "category": "Sites",
     "name": "Pre-Production",
-    "url": "https://preprod.myapp.com"
+    "content": "https://preprod.myapp.com",
+    "type": "url"
   },
   {
     "category": "Sites",
     "name": "Production",
-    "url": "https://prod.myapp.com"
+    "content": "https://prod.myapp.com",
+    "type": "url"
   },
   {
     "category": "Sites",
     "name": "Staging",
-    "url": "https://staging.myapp.com"
+    "content": "https://staging.myapp.com",
+    "type": "url"
   },
   {
     "category": "Indexer Reports",
     "name": "Beta 1 Indexer Report",
-    "url": "https://reports.beta1.com"
+    "content": "https://reports.beta1.com",
+    "type": "url"
   },
   {
     "category": "Indexer Reports",
     "name": "Beta 2 Indexer Report",
-    "url": "https://reports.beta2.com"
+    "content": "https://reports.beta2.com",
+    "type": "url"
   },
   {
     "category": "Indexer Reports",
     "name": "Pre-Prod Indexer Report",
-    "url": "https://reports.preprod.com"
+    "content": "https://reports.preprod.com",
+    "type": "url"
   },
   {
     "category": "Indexer Reports",
     "name": "Staging Indexer Report",
-    "url": "https://reports.staging.com"
+    "content": "https://reports.staging.com",
+    "type": "url"
   },
   {
     "category": "Confluence",
     "name": "Release Notes",
-    "url": "https://confluence.mycompany.com/release-notes"
+    "content": "https://confluence.mycompany.com/release-notes",
+    "type": "url"
   },
   {
     "category": "Confluence",
     "name": "Test Plan",
-    "url": "https://confluence.mycompany.com/test-plan"
+    "content": "https://confluence.mycompany.com/test-plan",
+    "type": "url"
   },
   {
     "category": "Confluence",
     "name": "QA Team Space",
-    "url": "https://confluence.mycompany.com/qa-space"
+    "content": "https://confluence.mycompany.com/qa-space",
+    "type": "url"
   },
   {
     "category": "Confluence",
     "name": "QA Onboarding",
-    "url": "https://confluence.mycompany.com/qa-onboarding"
+    "content": "https://confluence.mycompany.com/qa-onboarding",
+    "type": "url"
   },
   {
     "category": "Tools",
     "name": "Jira Board",
-    "url": "https://jira.mycompany.com/qa-board"
+    "content": "https://jira.mycompany.com/qa-board",
+    "type": "url"
   },
   {
     "category": "Tools",
     "name": "Jenkins CI/CD",
-    "url": "https://jenkins.mycompany.com"
+    "content": "https://jenkins.mycompany.com",
+    "type": "url"
   },
   {
     "category": "Tools",
     "name": "Sentry Error Monitoring",
-    "url": "https://sentry.mycompany.com"
+    "content": "https://sentry.mycompany.com",
+    "type": "url"
   },
   {
     "category": "Tools",
     "name": "Grafana Dashboards",
-    "url": "https://grafana.mycompany.com"
+    "content": "https://grafana.mycompany.com",
+    "type": "url"
   },
   {
     "category": "Tools",
     "name": "Bitbucket",
-    "url": "https://bitbucket.mycompany.com"
+    "content": "https://bitbucket.mycompany.com",
+    "type": "url"
   }
 ]

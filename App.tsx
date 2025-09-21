@@ -85,7 +85,7 @@ const App: React.FC = () => {
   // --- Health Checks ---
   const runHealthChecks = useCallback(async () => {
     setIsRefreshing(true);
-    const siteLinks = allLinks.filter(link => link.category === 'Sites');
+    const siteLinks = allLinks.filter(link => link.category === 'Sites' && link.type === 'url');
     
     setHealthStatuses(prev => {
         const newState = {...prev};
@@ -95,7 +95,7 @@ const App: React.FC = () => {
 
     await Promise.all(siteLinks.map(async (link) => {
         try {
-            await fetch(link.url, { mode: 'no-cors', signal: AbortSignal.timeout(5000) });
+            await fetch(link.content, { mode: 'no-cors', signal: AbortSignal.timeout(5000) });
             setHealthStatuses(prev => ({...prev, [link.id]: 'online'}));
         } catch (error) {
             setHealthStatuses(prev => ({...prev, [link.id]: 'offline'}));
@@ -341,7 +341,7 @@ const App: React.FC = () => {
     for (const category in linksToFilter) {
       const matchingLinks = linksToFilter[category].filter(link =>
         link.name.toLowerCase().includes(lowercasedFilter) ||
-        link.url.toLowerCase().includes(lowercasedFilter) ||
+        link.content.toLowerCase().includes(lowercasedFilter) ||
         link.category.toLowerCase().includes(lowercasedFilter)
       );
       if (matchingLinks.length > 0) filtered[category] = matchingLinks;
