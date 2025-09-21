@@ -10,6 +10,7 @@ import TestDataView from './components/TestDataView';
 import Toast from './components/Toast';
 import QuickToolsView from './components/QuickToolsView';
 import CategorySection from './components/CategorySection';
+import MultiOpenPopup from './components/MultiOpenPopup';
 import * as api from './api';
 import { DEFAULT_API_ENVIRONMENTS } from './environments';
 
@@ -30,6 +31,9 @@ const App: React.FC = () => {
   const [isDeleteModeActive, setIsDeleteModeActive] = useState(false);
   const [selectedLinkIds, setSelectedLinkIds] = useState<string[]>([]);
   const [isConfirmBulkDeleteOpen, setIsConfirmBulkDeleteOpen] = useState(false);
+  
+  // State for multi-open
+  const [multiOpenSelectedIds, setMultiOpenSelectedIds] = useState<string[]>([]);
 
   // State for command palette
   const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
@@ -256,12 +260,28 @@ const App: React.FC = () => {
   };
 
   const toggleDeleteMode = () => {
-    setIsDeleteModeActive(!isDeleteModeActive);
-    setSelectedLinkIds([]); 
+    const newDeleteModeState = !isDeleteModeActive;
+    setIsDeleteModeActive(newDeleteModeState);
+    setSelectedLinkIds([]);
+    if (newDeleteModeState) { // If turning on delete mode, clear other selections
+      setMultiOpenSelectedIds([]);
+    }
   };
   
   const handleSelectLink = (linkId: string) => {
     setSelectedLinkIds(prev =>
+      prev.includes(linkId)
+        ? prev.filter(id => id !== linkId)
+        : [...prev, linkId]
+    );
+  };
+  
+  const handleMultiOpenSelect = (linkId: string) => {
+    if (isDeleteModeActive) {
+      setIsDeleteModeActive(false);
+      setSelectedLinkIds([]);
+    }
+    setMultiOpenSelectedIds(prev =>
       prev.includes(linkId)
         ? prev.filter(id => id !== linkId)
         : [...prev, linkId]
@@ -351,6 +371,7 @@ const App: React.FC = () => {
 
   const hasResults = useMemo(() => Object.values(filteredLinks).some(links => links.length > 0), [filteredLinks]);
   const showDeleteBar = isDeleteModeActive && selectedLinkIds.length > 0;
+  const showMultiOpenPopup = isLinksView && multiOpenSelectedIds.length > 0;
   let animationCounter = 0;
 
   const renderMainContent = () => {
@@ -367,6 +388,8 @@ const App: React.FC = () => {
                 showCategoryTitle={selectedCategory === 'All'}
                 animationStartIndex={animationCounter}
                 onCopyToClipboard={handleCopyToClipboard}
+                multiOpenSelectedIds={multiOpenSelectedIds}
+                onMultiOpenSelect={handleMultiOpenSelect}
               />
             );
             animationCounter += links.length;
@@ -424,11 +447,11 @@ const App: React.FC = () => {
                   theme={theme} toggleTheme={toggleTheme}
               />
           )}
-          <main key={selectedCategory} className={`flex-1 overflow-y-auto animate-fade-in px-4 sm:px-6 lg:px-8 py-8 ${showDeleteBar ? 'pb-24' : ''}`}>
+          <main key={selectedCategory} className={`flex-1 overflow-y-auto animate-fade-in px-4 sm:px-6 lg:px-8 py-8 ${showDeleteBar || showMultiOpenPopup ? 'pb-24' : ''}`}>
               {renderMainContent()}
           </main>
           
-          {isLinksView && showDeleteBar && (
+          {showDeleteBar && (
             <div className="absolute bottom-0 left-0 right-0 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm z-20 border-t border-gray-200 dark:border-gray-700">
                 <div className="px-4 sm:px-6 lg:px-8 py-3 flex justify-between items-center">
                     <span className="font-medium text-gray-700 dark:text-gray-300">{selectedLinkIds.length} item(s) selected</span>
@@ -438,6 +461,18 @@ const App: React.FC = () => {
                     </div>
                 </div>
             </div>
+          )}
+          {showMultiOpenPopup && (
+            <MultiOpenPopup
+              selectedLinks={allLinks.filter(link => multiOpenSelectedIds.includes(link.id))}
+              onOpenAll={() => {
+                allLinks.filter(link => multiOpenSelectedIds.includes(link.id)).forEach(link => {
+                  window.open(link.url, '_blank', 'noopener,noreferrer');
+                });
+                setMultiOpenSelectedIds([]);
+              }}
+              onCancel={() => setMultiOpenSelectedIds([])}
+            />
           )}
         </div>
       </div>

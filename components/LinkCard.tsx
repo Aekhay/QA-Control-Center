@@ -11,6 +11,8 @@ interface LinkCardProps {
   onSelect: (id: string) => void;
   animationIndex: number;
   onCopyToClipboard: (text: string, message: string) => void;
+  isMultiOpenSelected: boolean;
+  onMultiOpenSelect: (id: string) => void;
 }
 
 const HealthStatusIndicator: React.FC<{ status: HealthStatus }> = ({ status }) => {
@@ -25,7 +27,7 @@ const HealthStatusIndicator: React.FC<{ status: HealthStatus }> = ({ status }) =
 };
 
 
-const LinkCard: React.FC<LinkCardProps> = ({ link, viewMode, onEdit, isDeleteModeActive, isSelected, onSelect, animationIndex, onCopyToClipboard }) => {
+const LinkCard: React.FC<LinkCardProps> = ({ link, viewMode, onEdit, isDeleteModeActive, isSelected, onSelect, animationIndex, onCopyToClipboard, isMultiOpenSelected, onMultiOpenSelect }) => {
   const [isCopied, setIsCopied] = useState(false);
     
   const gridBaseClasses = "group bg-white dark:bg-gray-700 p-4 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-600 hover:scale-[1.03] transition-all duration-300 flex items-center border border-gray-200 dark:border-gray-600 border-t-4 border-t-sky-500";
@@ -56,6 +58,19 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, viewMode, onEdit, isDeleteMod
     
   const cardContent = (
     <>
+      {!isDeleteModeActive && (
+        <input
+            type="checkbox"
+            checked={isMultiOpenSelected}
+            onChange={() => onMultiOpenSelect(link.id)}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            className="flex-shrink-0 mr-4 h-5 w-5 rounded border-gray-300 dark:border-gray-500 text-sky-600 focus:ring-sky-500 cursor-pointer bg-gray-100 dark:bg-gray-600"
+            aria-label={`Select ${link.name}`}
+          />
+      )}
       {isDeleteModeActive && (
         <div className="flex-shrink-0 mr-4">
           <div
