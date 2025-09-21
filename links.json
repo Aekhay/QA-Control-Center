@@ -21,6 +21,11 @@
     "url": "https://prod.myapp.com"
   },
   {
+    "category": "Sites",
+    "name": "Staging",
+    "url": "https://staging.myapp.com"
+  },
+  {
     "category": "Indexer Reports",
     "name": "Beta 1 Indexer Report",
     "url": "https://reports.beta1.com"
@@ -36,6 +41,11 @@
     "url": "https://reports.preprod.com"
   },
   {
+    "category": "Indexer Reports",
+    "name": "Staging Indexer Report",
+    "url": "https://reports.staging.com"
+  },
+  {
     "category": "Confluence",
     "name": "Release Notes",
     "url": "https://confluence.mycompany.com/release-notes"
@@ -49,6 +59,11 @@
     "category": "Confluence",
     "name": "QA Team Space",
     "url": "https://confluence.mycompany.com/qa-space"
+  },
+  {
+    "category": "Confluence",
+    "name": "QA Onboarding",
+    "url": "https://confluence.mycompany.com/qa-onboarding"
   },
   {
     "category": "Tools",
@@ -69,5 +84,10 @@
     "category": "Tools",
     "name": "Grafana Dashboards",
     "url": "https://grafana.mycompany.com"
+  },
+  {
+    "category": "Tools",
+    "name": "Bitbucket",
+    "url": "https://bitbucket.mycompany.com"
   }
 ]

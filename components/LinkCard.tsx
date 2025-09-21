@@ -62,10 +62,11 @@ const LinkCard: React.FC<LinkCardProps> = ({ link, viewMode, onEdit, isDeleteMod
         <input
             type="checkbox"
             checked={isMultiOpenSelected}
-            onChange={() => onMultiOpenSelect(link.id)}
+            onChange={() => {}} // onChange is a no-op as onClick handles the logic
             onClick={(e) => {
               e.preventDefault();
               e.stopPropagation();
+              onMultiOpenSelect(link.id);
             }}
             className="flex-shrink-0 mr-4 h-5 w-5 rounded border-gray-300 dark:border-gray-500 text-sky-600 focus:ring-sky-500 cursor-pointer bg-gray-100 dark:bg-gray-600"
             aria-label={`Select ${link.name}`}
