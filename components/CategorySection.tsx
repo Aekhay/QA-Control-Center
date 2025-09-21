@@ -13,8 +13,6 @@ interface CategorySectionProps {
   showCategoryTitle: boolean;
   animationStartIndex: number;
   onCopyToClipboard: (text: string, message: string) => void;
-  multiOpenSelectedIds: string[];
-  onMultiOpenSelect: (id: string) => void;
 }
 
 const CategorySection: React.FC<CategorySectionProps> = ({
@@ -28,8 +26,6 @@ const CategorySection: React.FC<CategorySectionProps> = ({
   showCategoryTitle,
   animationStartIndex,
   onCopyToClipboard,
-  multiOpenSelectedIds,
-  onMultiOpenSelect,
 }) => {
   const viewWrapperClasses = viewMode === 'grid'
     ? 'grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'
@@ -54,8 +50,6 @@ const CategorySection: React.FC<CategorySectionProps> = ({
             onSelect={onSelect}
             animationIndex={animationStartIndex + index}
             onCopyToClipboard={onCopyToClipboard}
-            isMultiOpenSelected={multiOpenSelectedIds.includes(link.id)}
-            onMultiOpenSelect={onMultiOpenSelect}
           />
         ))}
       </div>
