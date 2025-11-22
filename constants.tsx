@@ -3,9 +3,9 @@ import React from 'react';
 export const ExternalLinkIcon = ({ className }: { className?: string }) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
-    width="24"
-    height="24"
-    viewBox="0 0 24 24"
+    width="100%"
+    height="100%"
+    viewBox="-2 -2 28 28"
     fill="none"
     stroke="currentColor"
     strokeWidth="2"
@@ -22,9 +22,9 @@ export const ExternalLinkIcon = ({ className }: { className?: string }) => (
 export const SearchIcon = ({ className }: { className?: string }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -40,9 +40,9 @@ export const SearchIcon = ({ className }: { className?: string }) => (
 export const PencilIcon = ({ className }: { className?: string }) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
-        width="24" 
-        height="24" 
-        viewBox="0 0 24 24" 
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none" 
         stroke="currentColor" 
         strokeWidth="2" 
@@ -57,9 +57,9 @@ export const PencilIcon = ({ className }: { className?: string }) => (
 export const GridViewIcon = ({ className }: { className?: string }) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
-        width="24" 
-        height="24" 
-        viewBox="0 0 24 24" 
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none" 
         stroke="currentColor" 
         strokeWidth="2" 
@@ -77,9 +77,9 @@ export const GridViewIcon = ({ className }: { className?: string }) => (
 export const ListViewIcon = ({ className }: { className?: string }) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
-        width="24" 
-        height="24" 
-        viewBox="0 0 24 24" 
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none" 
         stroke="currentColor" 
         strokeWidth="2" 
@@ -99,9 +99,9 @@ export const ListViewIcon = ({ className }: { className?: string }) => (
 export const ChevronDownIcon = ({ className }: { className?: string }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -116,9 +116,9 @@ export const ChevronDownIcon = ({ className }: { className?: string }) => (
 export const CloseIcon = ({ className }: { className?: string }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -134,9 +134,9 @@ export const CloseIcon = ({ className }: { className?: string }) => (
 export const PlusIcon = ({ className }: { className?: string }) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
-        width="24" 
-        height="24" 
-        viewBox="0 0 24 24" 
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none" 
         stroke="currentColor" 
         strokeWidth="2" 
@@ -152,9 +152,9 @@ export const PlusIcon = ({ className }: { className?: string }) => (
 export const TrashIcon = ({ className }: { className?: string }) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
-        width="24" 
-        height="24" 
-        viewBox="0 0 24 24" 
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none" 
         stroke="currentColor" 
         strokeWidth="2" 
@@ -172,9 +172,9 @@ export const TrashIcon = ({ className }: { className?: string }) => (
 export const CommandIcon = ({ className }: { className?: string }) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
-        width="24" 
-        height="24" 
-        viewBox="0 0 24 24" 
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none" 
         stroke="currentColor" 
         strokeWidth="2" 
@@ -189,9 +189,9 @@ export const CommandIcon = ({ className }: { className?: string }) => (
 export const CornerDownLeftIcon = ({ className }: { className?: string }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -207,9 +207,9 @@ export const CornerDownLeftIcon = ({ className }: { className?: string }) => (
 export const CheckIcon = ({ className }: { className?: string }) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
-        width="24" 
-        height="24" 
-        viewBox="0 0 24 24" 
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none" 
         stroke="currentColor" 
         strokeWidth="3" 
@@ -224,9 +224,9 @@ export const CheckIcon = ({ className }: { className?: string }) => (
 export const UploadCloudIcon = ({ className }: { className?: string }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -243,9 +243,9 @@ export const UploadCloudIcon = ({ className }: { className?: string }) => (
 export const AlertTriangleIcon = ({ className }: { className?: string }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -263,9 +263,9 @@ export const AlertTriangleIcon = ({ className }: { className?: string }) => (
 export const CheckCircleIcon = ({ className }: { className?: string }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -281,9 +281,9 @@ export const CheckCircleIcon = ({ className }: { className?: string }) => (
 export const RefreshIcon = ({ className }: { className?: string }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -301,9 +301,9 @@ export const RefreshIcon = ({ className }: { className?: string }) => (
 export const CopyIcon = ({ className }: { className?: string }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -319,9 +319,9 @@ export const CopyIcon = ({ className }: { className?: string }) => (
 export const GlobeIcon = ({ className }: { className?: string }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -338,9 +338,9 @@ export const GlobeIcon = ({ className }: { className?: string }) => (
 export const DatabaseIcon = ({ className }: { className?: string }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -357,9 +357,9 @@ export const DatabaseIcon = ({ className }: { className?: string }) => (
 export const WrenchIcon = ({ className }: { className?: string }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -374,9 +374,9 @@ export const WrenchIcon = ({ className }: { className?: string }) => (
 export const ChevronRightIcon = ({ className }: { className?: string }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -388,12 +388,29 @@ export const ChevronRightIcon = ({ className }: { className?: string }) => (
     </svg>
 );
 
+export const ChevronLeftIcon = ({ className }: { className?: string }) => (
+    <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
+        fill="none"
+        stroke="currentColor"
+        strokeWidth="2"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+        className={className}
+    >
+        <path d="m15 18-6-6 6-6" />
+    </svg>
+);
+
 export const DragHandleIcon = ({ className }: { className?: string }) => (
     <svg
         xmlns="http://www.w3.org/2000/svg"
-        width="24"
-        height="24"
-        viewBox="0 0 24 24"
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none"
         stroke="currentColor"
         strokeWidth="2"
@@ -413,9 +430,9 @@ export const DragHandleIcon = ({ className }: { className?: string }) => (
 export const SunIcon = ({ className }: { className?: string }) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
-        width="24" 
-        height="24" 
-        viewBox="0 0 24 24" 
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none" 
         stroke="currentColor" 
         strokeWidth="2" 
@@ -438,9 +455,9 @@ export const SunIcon = ({ className }: { className?: string }) => (
 export const MoonIcon = ({ className }: { className?: string }) => (
     <svg 
         xmlns="http://www.w3.org/2000/svg" 
-        width="24" 
-        height="24" 
-        viewBox="0 0 24 24" 
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
         fill="none" 
         stroke="currentColor" 
         strokeWidth="2" 
@@ -449,5 +466,24 @@ export const MoonIcon = ({ className }: { className?: string }) => (
         className={className}
     >
         <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>
+    </svg>
+);
+
+export const MoreHorizontalIcon = ({ className }: { className?: string }) => (
+    <svg 
+        xmlns="http://www.w3.org/2000/svg" 
+        width="100%"
+        height="100%"
+        viewBox="-2 -2 28 28"
+        fill="none" 
+        stroke="currentColor" 
+        strokeWidth="2" 
+        strokeLinecap="round" 
+        strokeLinejoin="round" 
+        className={className}
+    >
+        <circle cx="12" cy="12" r="1"></circle>
+        <circle cx="19" cy="12" r="1"></circle>
+        <circle cx="5" cy="12" r="1"></circle>
     </svg>
 );

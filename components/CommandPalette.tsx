@@ -14,7 +14,8 @@ interface CommandPaletteProps {
 type CommandAction = {
     id: string;
     name: string;
-    icon: JSX.Element;
+    // FIX: Replaced JSX.Element with React.ReactNode to resolve "Cannot find namespace 'JSX'" error.
+    icon: React.ReactNode;
     perform: () => void;
     category: 'Actions';
 };

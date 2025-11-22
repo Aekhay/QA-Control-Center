@@ -1,5 +1,5 @@
-import React from 'react';
-import { GridViewIcon, ListViewIcon, PlusIcon, TrashIcon, RefreshIcon } from '../constants';
+import React, { useState, useEffect } from 'react';
+import { GridViewIcon, ListViewIcon, PlusIcon, TrashIcon, RefreshIcon, SearchIcon } from '../constants';
 import ThemeToggle from './ThemeToggle';
 
 interface HeaderProps {
@@ -12,15 +12,45 @@ interface HeaderProps {
   isRefreshing: boolean;
   theme: 'light' | 'dark';
   toggleTheme: () => void;
+  isSidebarCollapsed: boolean;
+  searchTerm: string;
+  setSearchTerm: (term: string) => void;
 }
 
-const Header: React.FC<HeaderProps> = ({ viewMode, setViewMode, onAddClick, isDeleteModeActive, toggleDeleteMode, onRefresh, isRefreshing, theme, toggleTheme }) => {
+const Header: React.FC<HeaderProps> = ({ 
+  viewMode, setViewMode, onAddClick, isDeleteModeActive, toggleDeleteMode, 
+  onRefresh, isRefreshing, theme, toggleTheme, isSidebarCollapsed, searchTerm, setSearchTerm 
+}) => {
+  const [shortcutHint, setShortcutHint] = useState('⌘K');
+
+  useEffect(() => {
+      if (typeof window !== 'undefined' && navigator.platform.toUpperCase().indexOf('MAC') < 0) {
+          setShortcutHint('Ctrl+K');
+      }
+  }, []);
+
   return (
     <header className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-lg sticky top-0 z-10 py-4 border-b border-gray-200 dark:border-gray-700 px-4 sm:px-6 lg:px-8">
-      <div className="flex justify-between items-center">
+      <div className="flex justify-between items-center w-full gap-4">
         <h1 className="text-xl font-bold text-gray-900 dark:text-gray-100 tracking-tight">
           Links
         </h1>
+        
+        <div className="flex-1 flex justify-center">
+            {isSidebarCollapsed && (
+                <div className="relative w-full max-w-md">
+                    <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 w-5 h-5 text-gray-400 pointer-events-none" />
+                    <input
+                        type="text"
+                        placeholder={`Search... (${shortcutHint})`}
+                        value={searchTerm}
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="pl-10 pr-4 py-2 w-full bg-gray-100 dark:bg-gray-700 text-gray-900 dark:text-gray-200 placeholder-gray-500 dark:placeholder-gray-400 rounded-lg border border-gray-300 dark:border-gray-600 focus:outline-none focus:ring-2 focus:ring-sky-500 transition"
+                    />
+                </div>
+            )}
+        </div>
+
         <div className="flex items-center gap-2">
           <div className="flex items-center bg-gray-200 dark:bg-gray-700 p-1 rounded-full">
             <button

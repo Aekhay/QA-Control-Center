@@ -10,6 +10,9 @@ import TestDataView from './components/TestDataView';
 import Toast from './components/Toast';
 import QuickToolsView from './components/QuickToolsView';
 import CategorySection from './components/CategorySection';
+import AddCategoryModal from './components/AddCategoryModal';
+import RenameCategoryModal from './components/RenameCategoryModal';
+import ConfirmDeleteCategoryModal from './components/ConfirmDeleteCategoryModal';
 import * as api from './api';
 import { DEFAULT_API_ENVIRONMENTS } from './environments';
 
@@ -49,6 +52,16 @@ const App: React.FC = () => {
   // State for Sidebar category re-ordering
   const [categoryOrder, setCategoryOrder] = useState<string[]>([]);
 
+  // State for Sidebar collapse
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState<boolean>(() => {
+    return localStorage.getItem('sidebarCollapsed') === 'true';
+  });
+
+  // State for Category Management Modals
+  const [isAddCategoryModalOpen, setIsAddCategoryModalOpen] = useState(false);
+  const [categoryToRename, setCategoryToRename] = useState<string | null>(null);
+  const [categoryToDelete, setCategoryToDelete] = useState<string | null>(null);
+
   const [theme, setTheme] = useState<Theme>(() => {
     const savedTheme = localStorage.getItem('theme') as Theme | null;
     const userPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
@@ -63,6 +76,11 @@ const App: React.FC = () => {
     }
     localStorage.setItem('theme', theme);
   }, [theme]);
+
+  // Persist sidebar collapsed state
+  useEffect(() => {
+    localStorage.setItem('sidebarCollapsed', String(isSidebarCollapsed));
+  }, [isSidebarCollapsed]);
 
   const toggleTheme = () => {
     setTheme(prevTheme => prevTheme === 'light' ? 'dark' : 'light');
@@ -226,6 +244,71 @@ const App: React.FC = () => {
         setIsDeleteModeActive(false);
     }
   };
+
+  // --- Category Management Handlers ---
+  const handleAddCategory = (newCategoryName: string) => {
+    const trimmedName = newCategoryName.trim();
+    if (sidebarCategories.map(c => c.toLowerCase()).includes(trimmedName.toLowerCase())) {
+        setToast({ message: `Category "${trimmedName}" already exists.`, type: 'warning' });
+        return;
+    }
+    setCategoryOrder(prev => [...prev, trimmedName]);
+    setToast({ message: `Category "${trimmedName}" added. Add a link to make it permanent.`, type: 'success' });
+  };
+
+  const handleRenameCategory = async (oldName: string, newName: string) => {
+    setCategoryToRename(null);
+    if (oldName === newName) return;
+    if (sidebarCategories.map(c => c.toLowerCase()).includes(newName.toLowerCase())) {
+        setToast({ message: `Category "${newName}" already exists.`, type: 'warning' });
+        return;
+    }
+
+    const linksToUpdate = allLinks.filter(link => link.category === oldName);
+    if (linksToUpdate.length === 0) { // Renaming an empty category
+        setCategoryOrder(prev => prev.map(c => c === oldName ? newName : c));
+        setToast({ message: 'Category renamed.', type: 'success' });
+        return;
+    }
+
+    setToast({ message: `Renaming category... This may take a moment.`, type: 'success' });
+    try {
+        await Promise.all(
+            linksToUpdate.map(link => api.updateLink({ ...link, category: newName }))
+        );
+        setToast({ message: 'Category renamed successfully.', type: 'success' });
+        await fetchLinks();
+        if (selectedCategory === oldName) setSelectedCategory(newName);
+    } catch (error) {
+        console.error("Error renaming category:", error);
+        setToast({ message: 'Failed to rename category.', type: 'warning' });
+    }
+  };
+
+  const handleDeleteCategory = async () => {
+    if (!categoryToDelete) return;
+
+    const idsToDelete = allLinks.filter(link => link.category === categoryToDelete).map(l => l.id);
+    
+    setCategoryToDelete(null); // Close modal immediately
+
+    if (idsToDelete.length === 0) { // Deleting an empty category from order
+        setCategoryOrder(prev => prev.filter(c => c !== categoryToDelete));
+        if (selectedCategory === categoryToDelete) setSelectedCategory('All');
+        setToast({ message: `Category "${categoryToDelete}" deleted.`, type: 'success' });
+        return;
+    }
+
+    try {
+        await api.deleteLinks(idsToDelete);
+        setToast({ message: `Category "${categoryToDelete}" and its ${idsToDelete.length} link(s) deleted.`, type: 'success' });
+        if (selectedCategory === categoryToDelete) setSelectedCategory('All');
+        await fetchLinks();
+    } catch (error) {
+        console.error("Error deleting category:", error);
+        setToast({ message: "Failed to delete category.", type: 'warning' });
+    }
+  };
   
   // Test Data Handlers (localStorage)
   const handleAddTestDataSet = (newDataSet: Omit<TestDataSet, 'id'>) => {
@@ -288,7 +371,7 @@ const App: React.FC = () => {
 
   const sidebarCategories = useMemo(() => {
     const dynamicCategories = Object.keys(categorizedLinks);
-    const allCurrentCats = ['All', ...dynamicCategories, 'Test Data', 'Quick Tools'];
+    const allCurrentCats = [...new Set(['All', ...dynamicCategories, ...categoryOrder.filter(c => !dynamicCategories.includes(c)), 'Test Data', 'Quick Tools'])];
   
     // If no custom order is set, use a default sort
     if (categoryOrder.length === 0) {
@@ -311,8 +394,16 @@ const App: React.FC = () => {
     });
   
     // Sync the order state with any new categories that have appeared
-    if (sorted.length !== categoryOrder.length) {
-      setCategoryOrder(sorted);
+    if (JSON.stringify(sorted) !== JSON.stringify(categoryOrder)) {
+        // Sync only if there's a meaningful change
+        const currentDynamicCats = new Set(Object.keys(categorizedLinks));
+        const newOrder = sorted.filter(cat => 
+            cat === 'All' || cat === 'Test Data' || cat === 'Quick Tools' || 
+            currentDynamicCats.has(cat) || categoryOrder.includes(cat)
+        );
+        if(JSON.stringify(newOrder) !== JSON.stringify(categoryOrder)) {
+           setCategoryOrder(newOrder);
+        }
     }
   
     return sorted;
@@ -404,17 +495,22 @@ const App: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-100 dark:bg-dark-bg font-sans text-gray-800 dark:text-gray-200 flex justify-center p-4 sm:p-6 lg:p-8">
-      <div className="w-full max-w-screen-xl flex bg-white dark:bg-gray-800 rounded-xl shadow-2xl shadow-gray-200/50 dark:shadow-black/20 overflow-hidden">
+    <div className="h-screen bg-gray-100 dark:bg-dark-bg font-sans text-gray-800 dark:text-gray-200 flex overflow-hidden">
+      <div className="w-full flex bg-white dark:bg-gray-800">
         <Sidebar
+          isCollapsed={isSidebarCollapsed}
+          toggleCollapse={() => setIsSidebarCollapsed(prev => !prev)}
           categories={sidebarCategories}
           selectedCategory={selectedCategory}
           setSelectedCategory={setSelectedCategory}
           searchTerm={searchTerm}
           setSearchTerm={setSearchTerm}
           onReorder={handleReorderCategories}
+          onAddCategoryClick={() => setIsAddCategoryModalOpen(true)}
+          onRenameCategoryClick={(category) => setCategoryToRename(category)}
+          onDeleteCategoryClick={(category) => setCategoryToDelete(category)}
         />
-        <div className="flex-1 flex flex-col overflow-hidden relative bg-gray-50 dark:bg-gray-900/50">
+        <div className={`flex-1 flex flex-col overflow-hidden relative bg-gray-50 dark:bg-gray-900/50 transition-all duration-300 ease-in-out ${isSidebarCollapsed ? 'w-[calc(100%-5rem)]' : 'w-[calc(100%-16rem)]'}`}>
           {isLinksView && (
               <Header
                   viewMode={viewMode} setViewMode={setViewMode}
@@ -422,6 +518,9 @@ const App: React.FC = () => {
                   isDeleteModeActive={isDeleteModeActive} toggleDeleteMode={toggleDeleteMode}
                   onRefresh={runHealthChecks} isRefreshing={isRefreshing}
                   theme={theme} toggleTheme={toggleTheme}
+                  isSidebarCollapsed={isSidebarCollapsed}
+                  searchTerm={searchTerm}
+                  setSearchTerm={setSearchTerm}
               />
           )}
           <main key={selectedCategory} className={`flex-1 overflow-y-auto animate-fade-in px-4 sm:px-6 lg:px-8 py-8 ${showDeleteBar ? 'pb-24' : ''}`}>
@@ -446,6 +545,11 @@ const App: React.FC = () => {
       {isLinksView && editingLink && <EditLinkModal link={editingLink} categories={Object.keys(categorizedLinks)} onClose={() => setEditingLink(null)} onSave={handleUpdateLink}/>}
       {isLinksView && isConfirmBulkDeleteOpen && <ConfirmBulkDeleteModal linksToDelete={allLinks.filter(link => selectedLinkIds.includes(link.id))} onClose={() => setIsConfirmBulkDeleteOpen(false)} onConfirm={handleConfirmBulkDelete}/>}
       {isLinksView && isCommandPaletteOpen && <CommandPalette isOpen={isCommandPaletteOpen} onClose={() => setIsCommandPaletteOpen(false)} links={allLinks} onAddLink={() => { setIsCommandPaletteOpen(false); setIsAddModalOpen(true); }} onToggleDeleteMode={() => { setIsCommandPaletteOpen(false); toggleDeleteMode(); }} onSetViewMode={(mode) => { setIsCommandPaletteOpen(false); setViewMode(mode); }} />}
+      
+      {isAddCategoryModalOpen && <AddCategoryModal onClose={() => setIsAddCategoryModalOpen(false)} onSave={handleAddCategory} />}
+      {categoryToRename && <RenameCategoryModal categoryName={categoryToRename} onClose={() => setCategoryToRename(null)} onSave={(newName) => handleRenameCategory(categoryToRename, newName)} />}
+      {categoryToDelete && <ConfirmDeleteCategoryModal categoryName={categoryToDelete} linkCount={allLinks.filter(l => l.category === categoryToDelete).length} onClose={() => setCategoryToDelete(null)} onConfirm={handleDeleteCategory}/>}
+
       {toast && <Toast message={toast.message} type={toast.type} onClose={() => setToast(null)} />}
     </div>
   );
